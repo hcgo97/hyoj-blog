@@ -1,0 +1,33 @@
+---
+title: 터미널에서 MySQL 접속
+slug: "/터미널에서-mysql-접속"
+date: 2023-04-02
+---
+
+#  MySQL 
+
+# local
+
+- mysql -u root -p
+
+# dev
+
+- mysql -u tasuser1 -p -h [v1-db-dev-lpin-io.c0ygh7mhd4is.ap-northeast-2.rds.amazonaws.com](http://v1-db-dev-lpin-io.c0ygh7mhd4is.ap-northeast-2.rds.amazonaws.com/)
+
+# secure
+
+### **ec2  **
+
+1. **ec2 **
+ssh -i lfin-secure-master.pem [ec2-user@main-bastion.secure.lpin.io](mailto:ec2-user@main-bastion.secure.lpin.io)
+2. **mysql  (ec2  local db)**
+mysql -u root -p -h [main-db.cluster-cqhco7usr0ea.ap-northeast-2.rds.amazonaws.com](http://main-db.cluster-cqhco7usr0ea.ap-northeast-2.rds.amazonaws.com/)
+
+### **ec2  **
+
+1. **3307 SSH   (sudo  )**
+**sudo** ssh -i lfin-secure-master.pem -f -N -L **3307**:main-db.cluster-cqhco7usr0ea.ap-northeast-2.rds.amazonaws.com:3306 [ec2-user@main-bastion.secure.lpin.io](mailto:ec2-user@main-bastion.secure.lpin.io) -v
+2. **mysql  ( 3307  secure  DB )**
+mysql -u root -p -h 127.0.0.1 -P 3307
+
+1 -P 3307

@@ -1,0 +1,144 @@
+---
+title: 프론트 돌아가는 원리 (react + redux + saga)
+slug: "/프론트-돌아가는-원리-(react-+-redux-+-saga)"
+date: 2023-04-02
+---
+
+# (react + redux + saga)
+
+## CMS
+
+##
+
+1. **package.json:** run
+2. **env-config:** API
+3. **DataSource**: API URI
+4. **Route**: path,
+5. \*\* \*\*: (, )
+6. ***
+   1. **constants.js**
+   2. **actions.js**
+   3. **reducer.js**
+   4. **selector.js**
+   5. **services.js**
+   6. **saga.js**
+   7. **Loadable.js**
+   8. **index.js**
+7. \*\* \*\*: index.js
+
+### DataSource.js
+
+- API URI
+
+### Route
+
+- path
+-
+- (layout)
+  loadable
+  loadable index.js , index.js  
+   index.js
+
+##
+
+- constants + actions + reducer
+- saga + selector + services
+- loadable + index
+
+### constants.js
+
+-       (  )
+- url
+
+### actions.js
+
+-
+- constants ( )
+
+### reducer.js
+
+- (initialState) , contants
+- (state) , (draft) ( )
+- reducers.js key: reducer
+
+### selector.js
+
+- reducer
+- reducer key
+
+### services.js
+
+- API
+- alert,
+
+### saga.js
+
+- API
+- (API )
+- services
+
+### Loadable.js
+
+- Route index.js
+
+### index.js
+
+-
+- **useInjectReducer, useInjectSaga**: key ,
+- index.js ** propType **
+- **mapStateToProps**: selector
+- **mapDispatchToProps**: actions, reducer
+- **export default compose(withConnect, memo)(LogList)**
+
+  - **compose(withConnect, memo)**: , compose withConnect memo memo  
+    **memo**: withConnect , withConnect(props)
+  - export     
+LogListTable(\{props\}) \{LogList
+
+        \}
+
+이는지 구분짓기 위한것임
+
+### actions.js
+
+- 상태 변화 함수 정의
+- constants에서 정의한 케이스에 대해 어떤 매개변수를 사용해서 변화시킬건지 작성 (매개변수는 없어도됨)
+
+### reducer.js
+
+- 초기 상태변수(initialState)를 정의하고, 이 초기상태들이 contants의 케이스들을 만나면 어떻게 변화할 것인지 정의함
+- 첫번째 매개변수(state)는 바꾸고싶은 객체, 두번째 매개변수(draft)는 바뀔 상태값(상태를 변경하는 로직) 작성
+- 작성후에 프로젝트 최상단 reducers.js 에서 key: reducer 형식으로 정의해야함
+
+### selector.js
+
+- reducer와 연결하여 상태변화할때 직접적으로 사용할 함수를 정의
+- reducer key로 연결
+
+### services.js
+
+- API를 어떻게 연결할지 비즈니스 로직 정의
+- alert창, 예외처리시 메시지도 여기서 정의해놔야함
+
+### saga.js
+
+- 연결된 API를 호출했을때 어떻게 동작할지 정의
+- 토큰검증도 여기서함(API를 호출했을때의 동작이므로)
+- services에서 정의해놓은 함수대로 동작함
+
+### Loadable.js
+
+- Route와 index.js를 서로 연결해줌
+
+### index.js
+
+- 컴포넌트가 어떻게 보여질것인지 정의함
+- **useInjectReducer, useInjectSaga**: key값으로 어떤 리듀서, 사가랑 연결할지 설정
+- index.js **메인함수에서 사용하는 변수들의 propType 설정**
+- **mapStateToProps**: 변수의 상태변화에 필요한 selector 지정
+- **mapDispatchToProps**: actions, reducer에서 지정한 함수대로 매개변수에 의해 어떤 케이스의 상태로 변화될건지 작성
+- **export default compose(withConnect, memo)(LogList)**
+  - **compose(withConnect, memo)**: 요소들을 합성하는 함수, compose로 withConnect랑 memo를 감싸서 memo함수가 동작하도록 함
+    → **memo**: withConnect의 요소들에서 바뀐게있는지 비교함, withConnect(props)의 상태가 바뀌지 않았다면 리렌더링 안하도록 하는 함수
+  - export되는 요소는 컴포넌트 내부 함수구조와 같음
+    → LogListTable(\{props\}) \{LogList\}

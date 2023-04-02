@@ -1,0 +1,305 @@
+---
+title: linux 유저, 유저 그룹 관련 명령어
+slug: "/linux-유저,-유저-그룹-관련-명령어"
+date: 2023-04-02
+---
+
+# linux ,    
+
+#  
+
+##  
+
+-   .
+
+```
+# cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+...
+```
+
+- root useradd  adduser     .
+
+```
+# grep /bin/bash /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+jb:x:1000:1000:JB:/home/jb:/bin/bash
+```
+
+##  
+
+### useradd
+
+- jb  .
+
+```
+useradd jb
+```
+
+-       -d  .
+
+```
+useradd jb -d /home/jbdir
+```
+
+- jb   .
+
+```
+passwd jb
+```
+
+### adduser
+
+- adduser     . useradd      ,        .
+
+# adduser jb
+
+Adding user `jb' ...
+
+Adding new group `jb' (1000) ...
+
+Adding new user `jb' (1000) with group `jb' ...
+
+Creating home directory `/home/jb' ...
+
+Copying files from `/etc/skel' ...
+
+New password:
+
+Retype new password:
+
+passwd: password updated successfully
+
+Changing the user information for jb
+
+Enter the new value, or press ENTER for the default
+
+Full Name []:
+
+Room Number []:
+
+Work Phone []:
+
+Home Phone []:
+
+Other []:
+
+Is the information correct? [Y/n]
+
+##  
+
+- jb  uid 1001 .
+
+```
+usermod -u 1001 jb
+```
+
+- jb    /home/jb-home .  /home/jb-home   .
+
+```
+usermod -d /home/jb-home jb
+```
+
+- /home/jb-home , jb    /home/jb-home ,   .
+
+```
+usermod -m -d /home/jb-home jb
+```
+
+##  
+
+- jb  .
+
+```
+userdel jb
+```
+
+- jb   .
+
+```
+userdel -f jb
+userdel --force jb
+```
+
+- jb    ,   .
+
+```
+userdel -r jb
+userdel --remove jb
+```
+
+## 
+
+- jb     .
+
+```
+groups jb
+```
+
+# group
+
+###  
+
+-   /et/group  . cat   ...
+
+```
+cat /etc/group
+```
+
+- tail      .
+
+```
+[root@localhost ~]# tail -n 5 /etc/group
+avahi:x:70:
+slocate:x:21:
+rngd:x:974:
+tcpdump:x:72:
+vboxsf:x:973:
+```
+
+- *`X:Y:Z`* , X  , Y  , Z  ID.
+
+##  
+
+- groupadd   .
+
+```
+[root@localhost ~]# groupadd group-1
+[root@localhost ~]# tail -n 5 /etc/group
+slocate:x:21:
+rngd:x:974:
+tcpdump:x:72:
+vboxsf:x:973:
+group-1:x:1000:
+```
+
+##  
+
+- groupdel   .
+
+```
+[root@localhost ~]# groupdel group-1
+[root@localhost ~]# tail -n 5 /etc/group
+avahi:x:70:
+slocate:x:21:
+rngd:x:974:
+tcpdump:x:72:
+vboxsf:x:973:
+```
+
+##  
+
+###   
+
+- user-1 group-1 .
+
+```
+[root@localhost ~]# gpasswd -a user-1 group-1
+Adding user user-1 to group group-1
+```
+
+- user-1   groups    .
+
+```
+[root@localhost ~]# groups user-1
+user-1 : user-1 group-1
+```
+
+###   
+
+- user-1 group-1 .
+
+```
+[root@localhost ~]# gpasswd -d user-1 group-1
+Removing user user-1 from group group-1
+[root@localhost ~]# groups user-1
+user-1 : user-1
+```
+
+###   
+
+- group-1 group-2 .
+
+```
+groupmod -n group-2 group-1
+```
+
+  : [https://www.manualfactory.net/13581](https://www.manualfactory.net/13581)
+
+  : [https://www.manualfactory.net/13414](https://www.manualfactory.net/13414)
+
+
+[root@localhost ~]# groupadd group-1
+[root@localhost ~]# tail -n 5 /etc/group
+slocate:x:21:
+rngd:x:974:
+tcpdump:x:72:
+vboxsf:x:973:
+group-1:x:1000:
+```
+
+## 그룹 삭제
+
+- groupdel 명령으로 그룹을 삭제합니다.
+
+```
+[root@localhost ~]# groupdel group-1
+[root@localhost ~]# tail -n 5 /etc/group
+avahi:x:70:
+slocate:x:21:
+rngd:x:974:
+tcpdump:x:72:
+vboxsf:x:973:
+```
+
+## 그룹 수정
+
+### 그룹에 사용자 추가
+
+- user-1을 group-1에 추가합니다.
+
+```
+[root@localhost ~]# gpasswd -a user-1 group-1
+Adding user user-1 to group group-1
+```
+
+- user-1이 속한 그룹은 groups 명령으로 확인할 수 있습니다.
+
+```
+[root@localhost ~]# groups user-1
+user-1 : user-1 group-1
+```
+
+### 그룹에서 사용자 제거
+
+- user-1을 group-1에서 제거합니다.
+
+```
+[root@localhost ~]# gpasswd -d user-1 group-1
+Removing user user-1 from group group-1
+[root@localhost ~]# groups user-1
+user-1 : user-1
+```
+
+### 그룹 이름 변경
+
+- group-1을 group-2로 변경합니다.
+
+```
+groupmod -n group-2 group-1
+```
+
+사용자 관련 출처: [https://www.manualfactory.net/13581](https://www.manualfactory.net/13581)
+
+그룹 관련 출처: [https://www.manualfactory.net/13414](https://www.manualfactory.net/13414)

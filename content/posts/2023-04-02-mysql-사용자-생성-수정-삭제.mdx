@@ -1,0 +1,39 @@
+---
+title: MySQL 사용자 생성 수정 삭제
+slug: "/mysql-사용자-생성-수정-삭제"
+date: 2023-04-02
+---
+
+# MySQL  //
+
+```sql
+use mysql;
+
+#  
+select * from user;
+create user 'kia_trip_user'@'%' identified by 'Z8gq$rGOBEHf^wOP';
+create user 'kia_trip_readonly'@'%' identified by 'LvV/_3$g*CON@r7Y';
+
+#   (DB.* to ''@'%')
+show grants for 'kia_trip_user'@'%';
+show grants for 'kia_trip_readonly'@'%';
+grant all privileges on kia_trip.* to 'kia_trip_user'@'%'; #   (grant all)
+grant select on kia_trip.* to 'kia_trip_readonly'@'%'; #   (grant select)
+flush privileges;
+
+#  
+revoke all on kia_trip.* from 'kia_trip_user'@'%';
+
+#  
+drop user 'kia_trip_user'@'%';
+
+#   host 
+select host, user, authentication_string from user;
+
+#  
+alter user 'kia_trip_user'@'%' identified with mysql_native_password by 'pUazNT9bhUJbqcUd';
+
+#  rename
+rename user 'kia-trip-user'@'%' to 'kia_trip_user'@'%';
+```
+

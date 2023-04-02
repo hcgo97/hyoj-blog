@@ -1,0 +1,132 @@
+---
+title: Postman Test
+slug: "/postman-test"
+date: 2023-04-02
+---
+
+# Postman Test
+
+### responseBody equals test
+
+```jsx
+// responseBody json
+const jsonData = pm.response.json()
+
+// pm.test(, )
+pm.test("responseZoneId is 'Z009'", () =\> \{
+
+		// pm.expect().to.eql()
+		pm.expect(jsonData.data.responseZoneId).to.eql("Z009");
+\}
+```
+
+### status
+
+```jsx
+const status = pm.response.status // "OK"
+
+// pm.test(, )
+pm.test("Status code is 200 Test~", () =\> \{
+
+		// pm.response.to.have.status()
+		pm.response.to.have.status(200);
+\}
+
+// json   status  ....
+const jsonData = pm.response.json();
+console.log(jsonData.status); // undefined
+```
+
+### not null check
+
+```jsx
+pm.expect(jsonData.data.encryptData).not.eq(null);
+```
+
+### responseBody
+
+```jsx
+/*
+	\{
+	    "apiVersion": "v1",
+	    "data": \{
+	        "content": [
+	            \{
+	                "result": false,
+	                "code": "2101",
+	                "message": "  .",
+	                "datetime": "2022-07-22T15:35:44+09:00"
+	            \},
+	            \{
+	                "result": true,
+	                "code": "0000",
+	                "message": " .",
+	                "datetime": "2022-07-22T15:34:51+09:00"
+	            \},
+	            \{
+	                "result": false,
+	                "code": "2101",
+	                "message": "  .",
+	                "datetime": "2022-07-22T15:34:35+09:00"
+	            \}
+					]
+			\}
+	\}
+*/
+
+const jsonData = pm.response.json();
+
+// content  result = true
+const trueData = jsonData.data.content.filter(content =\> content.result === true);
+
+/*
+	"result": true,
+	"code": "0000",
+	"message": " .",
+	"datetime": "2022-07-22T15:34:51+09:00"
+*/
+console.log(trueData[0]);
+```
+
+### API
+
+```jsx
+// postman.setNextRequest(API )
+// API
+//  API
+
+//        !!!!!
+postman.setNextRequest(" ");
+```
+
+###
+
+```jsx
+postman.setNextRequest(null);
+```
+
+: true,
+"code": "0000",
+"message": "정상적으로 처리되었습니다.",
+"datetime": "2022-07-22T15:34:51+09:00"
+\*/
+console.log(trueData[0]);
+
+````
+
+### 다음으로 호출할 API 지정하기
+
+```jsx
+// postman.setNextRequest(API 이름)
+// API 이름 지정할때 디렉터리 구조는 상관없음
+// 만일 API 이름이 중복이라면 테스트 시 실패함
+
+// 잘못 셋팅할경우 무한루프 걸릴수 있기 때문에 매우 조심!!!!!
+postman.setNextRequest("로그 검색");
+````
+
+### 마지막 요청으로 지정
+
+```jsx
+postman.setNextRequest(null);
+```

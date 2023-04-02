@@ -1,0 +1,25 @@
+---
+title: RedisCacheManager 메소드별 캐시 유효기간 설정
+slug: "/rediscachemanager-메소드별-캐시-유효기간-설정"
+date: 2023-04-02
+---
+
+# RedisCacheManager
+
+//
+
+Map\<String, RedisCacheConfiguration\> cacheConfigurations = new HashMap\<\>();
+
+// cell -\> : 1
+
+Duration d1d = Duration.ofDays(1L);
+
+cacheConfigurations.put("common-geolocation", configuration.entryTtl(d1d));
+
+// -\> : 14
+
+Duration d14d = Duration.ofDays(14L);
+
+cacheConfigurations.put("common-kakaoAddress", configuration.entryTtl(d14d));
+
+return builder.cacheDefaults(configuration).withInitialCacheConfigurations(cacheConfigurations).build();

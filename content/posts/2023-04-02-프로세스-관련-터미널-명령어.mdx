@@ -1,0 +1,61 @@
+---
+title: 프로세스 관련 터미널 명령어
+slug: "/프로세스-관련-터미널-명령어"
+date: 2023-04-02
+---
+
+#
+
+lsof -i tcp:\{ \}
+
+###
+
+kill $(lsof -t -i:\{ \})
+
+### (LIST = )
+
+netstat -anp | grep LIST
+
+- -a: all, tcp + udp + sockets
+- -n: Local Address IP
+- -p:
+
+### +
+
+netstat -tulpn
+
+- -t: tcp
+- -u: udp
+- -l: localhost(0.0.0.0)
+
+### id
+
+kill -9 \<pid\>
+
+###
+
+fuser -k 8080/tcp
+
+- tcp 8080
+
+###
+
+ps -ef | grep \{1\} | grep \{2\}
+
+- -e: all process
+- -f: full-format,
+- -ef:
+
+� 죽이기
+
+fuser -k 8080/tcp
+
+- tcp 8080 포트를 죽임
+
+### 실행중인 프로세스 중에서 특정 문자열 드간거 보여줌
+
+ps -ef | grep \{문자열1\} | grep \{문자열2\}
+
+- -e: all process
+- -f: full-format, 명령줄을 포함한 전체 형식
+- -ef: 명령줄을 포함한 전체형식의 모든 프로세스

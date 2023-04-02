@@ -1,0 +1,167 @@
+---
+title: 테라폼 사용법
+slug: "/테라폼-사용법"
+date: 2023-04-02
+---
+
+#
+
+      vscode
+
+- code .
+
+##
+
+1.  VCS - git
+2.
+3.        [main.tf](http://main.tf)
+    1. [main.tf](http://main.tf) main.tf
+
+( )
+
+-       .
+-
+
+##
+
+1.
+2. browse all
+3. - documentation
+4.
+
+```
+terraform \{
+  required_providers \{
+    aws = \{
+      source  = "hashicorp/aws"
+      version = "~\> 3.0"
+    \}
+  \}
+\}
+
+# Configure the AWS Provider
+provider "aws" \{
+  region = "us-east-1"
+\}
+
+# Create a VPC
+resource "aws_vpc" "example" \{
+  cidr_block = "10.0.0.0/16"
+\}
+```
+
+##
+
+1. terraform login
+2.
+3. plan
+   1.
+   2. terraform plan
+4. plan .lock
+   1. .lock terraform init
+   2. .lock (?) - provider
+
+## import
+
+### import arn
+
+### import
+
+- terraform state rm .
+  - **terraform state rm aws_s3_bucket.l-zone-admin**
+
+### import
+
+- aws
+- aws
+-      import
+
+1.  import    import
+
+
+2.  import resource  -   excemple
+
+    ![Untitled](%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled.png)
+
+3.  import  resource
+
+    ![Untitled](%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled%201.png)
+
+## import
+
+1.            plan
+2.  ![Untitled](%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled%202.png)
+
+3.  1. (-), null( null)
+4.        ++L   (  +L   )
+
+    ![Untitled](%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled%203.png)
+
+##
+
+1. terraform plan
+2. terraform apply **yes** (!!!!)
+3. ( )
+
+## import plan replace
+
+1.
+2.         plan
+3.          ((-),  null)
+
+### import data
+
+- data arn string
+- (subnet , security group )
+
+###
+
+az account set --subscription "ALL-Microsoft Azure "
+
+### database (import )
+
+create_mode = DEFAULT ,
+
+5%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled.png)
+
+3. import 명령어에 resource 정보 삽입
+
+   ![Untitled](%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled%201.png)
+
+## 기존 설정을 최대한 유지하면서 import 하고 싶을때
+
+1. 기존 설정된 리소스 중 하나를 잠깐 삭제한 후 plan 을 건다
+2. 그러면 삭제한다고 나오는데 그걸 복사
+
+   ![Untitled](%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled%202.png)
+
+3. 복사한 소스를 붙여넣은 후 필요없는 부분 삭제
+   1. 마이너스(-), 화살표 null(→ null)
+4. 공통된 부분을 드래그 한후에 커맨드+쉬프트+L 하면 다지워짐 (커맨드 안먹으면 옵션+L 한다음에 다시 해보기)
+
+   ![Untitled](%E1%84%90%E1%85%A6%E1%84%85%E1%85%A1%E1%84%91%E1%85%A9%E1%86%B7%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B8%20a66d75ada93045f791d2f8fa1361ab4d/Untitled%203.png)
+
+## 적용할때
+
+1. terraform plan 으로 변경점 확인
+2. terraform apply → 하고 **yes** 를 쳐야 적용됨 (조심!!!!)
+3. 리소스(특히 로드밸런서) 삭제할때 연결되어잇는 것들을 연결해제를 먼저 해야함
+
+## 리소스 껍대기만 만들고 import → plan 햇는데 replace 라고 뜰때
+
+1. 기존 설정된걸 덮어씌운다는 말이기 때문에 적용하면 큰일남
+2. 만들었던 리소스 껍대기를 지우고 다시 plan
+3. 그러면 삭제된다고 뜨는데 그걸 복사해서 필요없는 부분(마이너스(-), → null) 삭제하면됨
+
+### import 말고 data 쓰는 경우
+
+- data 를 쓰면 arn 을 string으로 바로 가져올수있기 때문에
+- 거의 안바뀌는 값들 (subnet , security group …)
+
+### 애저 구독키 변경
+
+az account set --subscription "ALL-Microsoft Azure 스폰서쉽"
+
+### 애저 database 생성 (import 아님)
+
+create_mode = DEFAULT 가 기본값인데, 이렇게 되면 관리자 계정이랑 암호를 무조건 설정해줘야함

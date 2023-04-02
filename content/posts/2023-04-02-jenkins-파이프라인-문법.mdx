@@ -1,0 +1,100 @@
+---
+title: Jenkins 파이프라인 문법
+slug: "/jenkins-파이프라인-문법"
+date: 2023-04-02
+---
+
+# Jenkins
+
+## Declarative Pipeline
+
+![Untitled](Jenkins%20%E1%84%91%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%91%E1%85%B3%E1%84%85%E1%85%A1%E1%84%8B%E1%85%B5%E1%86%AB%20%E1%84%86%E1%85%AE%E1%86%AB%E1%84%87%E1%85%A5%E1%86%B8%205793c75a51ab4f6f808b8ef9d225a4b7/Untitled.png)
+
+###
+
+- node / agent
+  -     ,   PC
+  - node Scripted Pipeline
+- master
+  - PC
+- slave
+  - (master) PC
+
+###
+
+```jsx
+//
+pipeline \{
+  //   any
+  agent any
+  //   stages
+  stages \{
+      //  ('execute ls command')
+      stage('execute ls command') \{
+        //    steps
+        steps \{
+          // 'execute ls command'
+          echo 'execute ls command'
+          // shell  'ls -la'
+          sh 'ls -la'
+        \}
+      \}
+      //  ('Where do ls command execute?')
+      stage('Where do ls command execute?') \{
+        //    steps
+        steps \{
+          // 'Here is default.'
+          echo 'Here is default.'
+          // shell  'ls -la'
+          sh 'ls -la'
+          // 'you can define where to execute command.'
+          echo 'you can define where to execute command.'
+          // 'For example, I want to view root directory'
+          echo 'For example, I want to view root directory'
+          // shell  'ls -la /'
+          sh 'ls -la /'
+        \}
+      \}
+      //  ('Is there any other way?')
+      stage('Is there any other way?') \{
+         //    steps
+        steps \{
+           // 'Maybe sh is independent'
+          echo 'Maybe sh is independent'
+          // sh     cd / , pwd , ls -la
+          sh 'cd /'
+          sh 'pwd'
+          sh 'ls -la'
+          // 'If you want to execute multiple commands in one sh.'
+          echo 'If you want to execute multiple commands in one sh.'
+          // sh   cd / , pwd , ls -la
+          sh '''cd /
+          pwd
+          ls -la'''
+        \}
+      \}
+    \}
+  \}
+```
+
+1.  Stage
+
+    ![Untitled](Jenkins%20%E1%84%91%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%91%E1%85%B3%E1%84%85%E1%85%A1%E1%84%8B%E1%85%B5%E1%86%AB%20%E1%84%86%E1%85%AE%E1%86%AB%E1%84%87%E1%85%A5%E1%86%B8%205793c75a51ab4f6f808b8ef9d225a4b7/Untitled%201.png)
+
+2.  Stage
+
+    ![Untitled](Jenkins%20%E1%84%91%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%91%E1%85%B3%E1%84%85%E1%85%A1%E1%84%8B%E1%85%B5%E1%86%AB%20%E1%84%86%E1%85%AE%E1%86%AB%E1%84%87%E1%85%A5%E1%86%B8%205793c75a51ab4f6f808b8ef9d225a4b7/Untitled%202.png)
+
+3.  Stage
+
+    ![Untitled](Jenkins%20%E1%84%91%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%91%E1%85%B3%E1%84%85%E1%85%A1%E1%84%8B%E1%85%B5%E1%86%AB%20%E1%84%86%E1%85%AE%E1%86%AB%E1%84%87%E1%85%A5%E1%86%B8%205793c75a51ab4f6f808b8ef9d225a4b7/Untitled%203.png)
+
+: [https://blog.naver.com/PostView.naver?blogId=rudnfskf2&logNo=221470021793&parentCategoryNo=&categoryNo=58&viewDate=&isShowPopularPosts=true&from=search](https://blog.naver.com/PostView.naver?blogId=rudnfskf2&logNo=221470021793&parentCategoryNo=&categoryNo=58&viewDate=&isShowPopularPosts=true&from=search)
+
+E1%85%B5%E1%84%91%E1%85%B3%E1%84%85%E1%85%A1%E1%84%8B%E1%85%B5%E1%86%AB%20%E1%84%86%E1%85%AE%E1%86%AB%E1%84%87%E1%85%A5%E1%86%B8%205793c75a51ab4f6f808b8ef9d225a4b7/Untitled%202.png)
+
+3. 세번째 Stage
+
+   ![Untitled](Jenkins%20%E1%84%91%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%91%E1%85%B3%E1%84%85%E1%85%A1%E1%84%8B%E1%85%B5%E1%86%AB%20%E1%84%86%E1%85%AE%E1%86%AB%E1%84%87%E1%85%A5%E1%86%B8%205793c75a51ab4f6f808b8ef9d225a4b7/Untitled%203.png)
+
+출처: [https://blog.naver.com/PostView.naver?blogId=rudnfskf2&logNo=221470021793&parentCategoryNo=&categoryNo=58&viewDate=&isShowPopularPosts=true&from=search](https://blog.naver.com/PostView.naver?blogId=rudnfskf2&logNo=221470021793&parentCategoryNo=&categoryNo=58&viewDate=&isShowPopularPosts=true&from=search)

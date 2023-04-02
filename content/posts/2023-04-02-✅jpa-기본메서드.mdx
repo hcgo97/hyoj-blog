@@ -1,0 +1,87 @@
+---
+title: ✅JPA 기본메서드
+slug: "/✅jpa-기본메서드"
+date: 2023-04-02
+---
+
+# JPA
+
+**save()** insert,update
+
+**findOne()** primary key
+
+**findAll()** , (sort), (pageable)
+
+**count()**
+
+**delete()**
+
+## \*\*\*\*
+
+**findBy~** (where)
+
+**countBy~**
+
+## **findBy~ **
+
+**And** - and
+
+findByEmailAndUserId(String email, String userid)
+
+**Or** - or
+
+findByEmailOrUserId(String email, String userid)
+
+**Between** - between
+
+findByCreatedAtBetween(Date fromDate, Date toDate)
+
+**LessThan** - \<
+
+findByAgeLessThan(int age)
+
+**GreaterThanEqual** - \>=
+
+findByAgeGreaterThanEqual(int age)
+
+**Like** - like
+
+findByNameLike(String name)
+
+**IsNull** - null
+
+findByJobIsNull()
+
+**In** -
+
+findByJobIn(List\<String\> jobs)
+
+**OrderBy** -
+
+findByEmailOrderByNameAsc(String email)
+
+**@Query JPQL **
+
+- String (type check )
+- native = true SQL
+
+@Query("select m from Member m where m.username = ?1")
+
+Member findByUsername(String username, Pageable pageable);
+
+검색
+
+findByJobIn(List\<String\> jobs)
+
+**OrderBy** - 검색결과를 정렬하여 전달
+
+findByEmailOrderByNameAsc(String email)
+
+**@Query 어노테이션 사용해서 JPQL 사용가능**
+
+- 무조건 String 타입(type check 불가능)
+- native = true 옵션 사용으로 SQL 과 동일하게 사용가능
+
+@Query("select m from Member m where m.username = ?1")
+
+Member findByUsername(String username, Pageable pageable);

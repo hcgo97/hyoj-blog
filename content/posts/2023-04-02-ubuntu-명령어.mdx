@@ -1,0 +1,139 @@
+---
+title: ubuntu 명령어
+slug: "/ubuntu-명령어"
+date: 2023-04-02
+---
+
+# ubuntu
+
+**service --status-all**
+
+-
+- [ + ] :
+- [ - ] :
+- ## **service --status-all | grep +**
+
+**sudo su -**
+
+- root
+
+### 1. (LocalRemote)
+
+`\> scp [ ] []@[IP]:[ ]
+
+EX) /home/example.txt /home/test  
+\> scp /home/example.txt dhj@141.211.xx.xxx:/home/test`
+
+### 2. (RemoteLocal)
+
+`\> scp []@[IP]:[ ] [ ]
+
+EX) /home/test.txt /home/example  
+\> scp dhj@141.211.xx.xxx:/home/test.txt /home/example`
+
+### 3. (RemoteRemote)
+
+`\> scp []@[IP]:[ ] []@[IP]:[ ]
+
+EX) A /home/test.txt B /home/example  
+\> scp dhj@141.211.xx.xxx:/home/test.txt gildong@141.223.xx.xxx:/home/example`
+
+---
+
+## (options)
+
+- `r`: ( ). .
+- `P`: ssh
+- `i`: identity file (identity file )
+
+`\> ex) scp -i ~/.ssh/dhj-server-private ~/example.txt dhj@141.223.xx.xxx:/home/test`
+
+- `v`: (verbose )
+- `p`:
+
+`\> ex) scp -P 22 dhj@141.223.xx.xxx:/home/dhj/example.txt /home/test`
+
+---
+
+##
+
+### 1. (LocalRemote)
+
+`\> scp [] [1] [2] []@[IP]:[ ]`
+
+### 2. (RemoteLocal)
+
+1 .
+
+`\> scp [] []@[IP]:"[1] [2]" [ ]`
+
+### 3. (RemoteRemote)
+
+        .
+
+`\> scp [] []@[IP]:"[1] [2]" []@[IP]:[ ]`
+
+## ldd -
+
+```bash
+#       /lib
+# /lib  /usr/local/lib
+
+ldd []
+```
+
+## gz
+
+```bash
+gzip -d \{ \}.gz
+
+# gzip
+apt-get install gzip
+```
+
+경로를 지정)
+
+`\> ex) scp -i ~/.ssh/dhj-server-private ~/example.txt dhj@141.223.xx.xxx:/home/test`
+
+- `v`: 상세내용을 보면서 디버깅 할 때 사용(verbose 모드)
+- `p`: 전송 시 파일 수정 시간과 권한을 유지
+
+`\> ex) scp -P 22 dhj@141.223.xx.xxx:/home/dhj/example.txt /home/test`
+
+---
+
+## 복수의 파일 전송
+
+### 1. 로컬에서 원격으로 (Local→Remote)
+
+`\> scp [옵션] [파일명1] [파일명2] [유저명]@[IP주소]:[받을 경로]`
+
+### 2. 원격에서 로컬로 (Remote→Local)
+
+1번의 경우와 다르게 원격지에서 보낼 파일들의 경로를 “ “을 이용해 묶어준다.
+
+`\> scp [옵션] [유저명]@[IP주소]:"[파일명1] [파일명2]" [받을 경로]`
+
+### 3. 원격에서 원격으로 (Remote→Remote)
+
+마찬가지로 원격지에서 보낼 파일들의 경로를 “ “을 이용해 묶어준다.
+
+`\> scp [옵션] [유저명]@[IP주소]:"[파일명1] [파일명2]" [유저명]@[IP주소]:[받을 경로]`
+
+## ldd - 라이브러리 의존성 확인
+
+```bash
+# 이 명령어로 필요한 라이브러리 확인 후 /lib 내부로 필요한 라이브러리 옮기면됨
+# /lib 혹은 /usr/local/lib
+
+ldd [옵션] 파일명
+```
+
+## gz 압축 풀기
+
+```bash
+gzip -d \{압축 파일명\}.gz
+
+# gzip 설치
+apt-get install gzip
+```

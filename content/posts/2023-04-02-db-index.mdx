@@ -1,0 +1,100 @@
+---
+title: DB index
+slug: "/db-index"
+date: 2023-04-02
+---
+
+# DB index
+
+## 1.
+
+- explain
+- **explain** select \* from Table_Name where A='a' and B='b' order by C,D,E ;
+- type
+  - ALL :
+  - : (system,const,eq_ref,range,index,ALL,fulltext)
+- key
+  -
+
+### 2.
+
+- 2 ( )
+- 1/3
+- ex) Table_Name No Primary Key, A Index , 30000
+  - select \* from Table_Name where No\>0 and A\>0; // ** .**
+  - select \* from Table_Name where No\>20000 and A\>0; // **Primary .**
+  - select \* from Table_Name where No\>0 and A\>20000; // **A .**
+
+### 3. ( )
+
+-
+- CREATE INDEX GeoHistory_requestId_createdAt_serviceName_index
+  ON GeoHistory **(A,B,C)**;
+- ALTER TABLE Table_Name ADD INDEX **(A,B,C)**;
+
+### 4. order by
+
+- select \* from Table_Name order by A; A
+- select \* from Table_Name where B='b' order by A; B .
+-        (A,B) , A  where
+- ORDER BY
+  - `order by b, c`
+    - **a **
+  - `order by a, c`
+    - **b a, c **
+  - `order by a, c, b`
+    - order by \*\* \*\*
+  - `order by a, b desc, c`
+    - b `desc`
+  - `order by a, b, c, d`
+    - \*\* \*\*d
+- MySQL 8.0 desc index
+  - scan
+  - index /
+
+### 5. LIKE
+
+- where A like '%a%'
+- where A like 'a%'
+
+### 6. join
+
+- SELECT A.x, B.y, C.z
+  FROM A, B, C
+  WHERE A.x = B.y
+  AND B.y = C.z;
+- A,B,C 1000 1000 _ 1000 _ 1000  
+  ** :** - **(1)** B A  
+   - **(2)** C B
+
+from Table_Name where B='b' order by A; → 이 경우에 B인덱스만 탄다.
+
+- 이경우에 두개의 인덱스를 다 타게 하려면 결합인덱스로 (A,B)를 생성시키고, A의 조건을 where 문에 지정해야함
+- ORDER BY 에서 인덱스가 적용 안되는 경우
+  - `order by b, c`
+    - 인덱스 첫번째 컬럼인 **a가 누락**되어 사용 불가
+  - `order by a, c`
+    - 인덱스에 포함된 **b 컬럼이 a, c 사이에 미포함**되어 사용 불가
+  - `order by a, c, b`
+    - 인덱스 컬럼과 order by 컬럼간 **순서 불일치**로 사용 불가
+  - `order by a, b desc, c`
+    - b 컬럼의 `desc` 로 인해서 사용 불가
+  - `order by a, b, c, d`
+    - 인덱스에 **존재하지 않는 컬럼** d로 인해 사용 불가
+- MySQL 8.0 이전 버전까지는 desc index 적용되지 않음
+  - 단지 scan 방식만 선택가능함
+  - 만들어진 index 블록을 앞에서부터 읽을지 / 뒤에서부터 읽을지
+
+### 5. LIKE 에서 사용하는 인덱스
+
+- where A like '%a%' → 인덱스를 타지 않음
+- where A like 'a%' → 인덱스를 탐
+
+### 6. join문에서의 인덱스
+
+- SELECT A.x, B.y, C.z
+  FROM A, B, C
+  WHERE A.x = B.y
+  AND B.y = C.z;
+- A,B,C 테이블에 각각 1000개의 데이터가 들어있다고 가정하면 1000 _ 1000 _ 1000 번이 되기 때문에 속도이슈 발생함
+  **→ 해결방안 :** - **(1)** B 테이블에 A 테이블의 데이터와 관련있는곳에 인덱스를 사용 - **(2)** C 테이블에 B 테이블의 데이터와 관련있는곳에 인덱스를 사용

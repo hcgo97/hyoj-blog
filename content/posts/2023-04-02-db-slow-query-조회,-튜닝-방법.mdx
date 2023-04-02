@@ -1,0 +1,46 @@
+---
+title: DB Slow Query 조회, 튜닝 방법
+slug: "/db-slow-query-조회,-튜닝-방법"
+date: 2023-04-02
+---
+
+# DB Slow Query ,
+
+## Slow Query
+
+- select rock -\> DB .
+- PK index . where PK .
+- where (Date) ..
+- Date index select .
+
+##
+
+- -\> Database report -\>
+
+##
+
+1. index
+2. query
+3. join (select join rock )
+
+## Index
+
+- Select . index Select
+- Insert, Update, Delete . index .
+
+�� 있다.
+
+## 조회 방법
+
+- 뉴렐릭 -\> Database report -\> 쿼리 시간 가장 많이 걸린거 찾기
+
+## 튜닝 방법
+
+1. index 걸기
+2. query 자체 변경
+3. join 을 많이 사용하지 않기 (select 시 join이 걸려있는 테이블 모두 rock 걸림)
+
+## Index 단점
+
+- Select 할 때는 빠르다. 해당 컬럼에 매겨진 번호를 비교하여 찾기 때문에 index 없는 것 보다 Select 시에는 훨씬빠름
+- 하지만 Insert, Update, Delete 등 데이터를 변경해야 할때는 느려진다. 데이터가 데이터 중간에 삽입될 경우엔 원래 매겨진 index 번호가 한칸씩 밀려서 다시 매겨지기 때문이다.

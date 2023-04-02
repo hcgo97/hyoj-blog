@@ -1,0 +1,27 @@
+---
+title: ruby block
+slug: "/ruby-block"
+date: 2023-04-02
+---
+
+# ruby block
+
+```ruby
+# List\<Cellphone\> cellphones = users.stream.map(user -\> user.getCellphone()).colle~!@
+cellphones = users.collect \{ |user| user.cellphone \}
+
+cellphones = users.collect do |user|
+   user.cellphone
+end
+
+# users.stream().map(Users::getCellphones).collect(toList~~)
+cellphones = users.collect(&:cellphone)
+```
+
+each for each
+
+select filter
+
+collect, map map
+
+11, 12

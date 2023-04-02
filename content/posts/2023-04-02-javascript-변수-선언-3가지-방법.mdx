@@ -1,0 +1,140 @@
+---
+title: javascript 변수 선언 3가지 방법
+slug: "/javascript-변수-선언-3가지-방법"
+date: 2023-04-02
+---
+
+# javascript 3
+
+##
+
+1.  - Sources
+2.
+3.
+4.  Scope
+
+### 1. var (function scope)
+
+```jsx
+var i; // , "undefined"
+var sum = 0; //
+
+var i, sum; //
+
+var i = 0,
+  sum = 10,
+  message = "Hello"; //
+
+name = "javascript~"; //
+```
+
+- undefined
+- ## function scope ( )
+  -
+-     var       (hoisting )
+
+```jsx
+var scope = "global";
+
+function example() \{
+  console.log(scope); // "global"  "undefiend"
+
+  var scope = "local";
+  console.log(scope); // "local"
+\}
+
+// =\>
+function example() \{
+  var scope; // (hoisting) . (  )
+  console.log(scope); // "undefined"
+
+  scope = "local"; //   .
+  console.log(scope); // "local"
+\}
+```
+
+### 2. let (block scope)
+
+```jsx
+let i; // , "undefined"
+let sum = 0; //
+
+let i, sum; //
+
+let i = 0,
+  sum = 10,
+  message = "Hello"; //
+```
+
+- undefined
+- block scope ( )
+  - ,
+  - var
+    - var:
+    - let:
+- hoisting .
+  - ReferenceError
+
+### 3. const (block scope)
+
+- - ,
+-
+- let ( )
+- hoisting , x
+
+```jsx
+/*   */
+
+foo(); // "bar"
+
+function foo() \{
+  console.log("bar");
+\}
+
+/*   */
+
+foo(); // TypeError: foo is not a function
+
+var foo = function () \{
+  console.log("bar");
+\};
+```
+
+: [https://medium.com/@wainy254/--c696c3b9e787](https://medium.com/@wainy254/%EB%B3%80%EC%88%98-%EC%84%A0%EC%96%B8-c696c3b9e787)
+
+�은 undefined
+
+- block scope (블록 유효범위)
+  - 선언된 블록, 구분 또는 표현식 내부에서만 유효함
+  - var 와 다른점
+    - var: 블록 범위를 무시하고 전역 변수나 함수 지역 변수로 선언됨
+    - let: 블록 범위에서만 유효
+- hoisting 되지 않는다.
+  - 선언되기 전에 참조할경우 ReferenceError 발생함
+
+### 3. const (block scope)
+
+- 상수 - 재할당 불가, 재선언 불가
+- 선언과 동시에 반드시 초기화 필요
+- 범위는 let과 같음 (블록 유효범위)
+- 함수 선언만 hoisting 됨, 함수 표현식은 x
+
+```jsx
+/* 함수 선언 */
+
+foo(); // "bar"
+
+function foo() \{
+  console.log("bar");
+\}
+
+/* 함수 표현식 */
+
+foo(); // TypeError: foo is not a function
+
+var foo = function () \{
+  console.log("bar");
+\};
+```
+
+출처: [https://medium.com/@wainy254/변수-선언-c696c3b9e787](https://medium.com/@wainy254/%EB%B3%80%EC%88%98-%EC%84%A0%EC%96%B8-c696c3b9e787)

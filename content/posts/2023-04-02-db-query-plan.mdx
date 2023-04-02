@@ -1,0 +1,187 @@
+---
+title: DB Query Plan
+slug: "/db-query-plan"
+date: 2023-04-02
+---
+
+# DB Query Plan
+
+EXPLAIN
+
+-
+
+```sql
+EXPLAIN
+SELECT * FROM short_url su
+LEFT OUTER JOIN short_url_stat sus ON su.hash = sus.hash
+WHERE deleted_date IS NULL;
+
+#   ?
+#      22    2 self  ,         self    .  Query Plan , type    ALL       , ref      .
+```
+
+()
+
+![Untitled](DB%20Query%20Plan%20edca6480aacb4796a5a63cf1a3a8b041/Untitled.png)
+
+### id
+
+- select
+
+### select_type
+
+- select
+  - **SIMPLE**
+    - select ( union )
+  - **PRIMARY**
+    - select
+  - **UNION**
+    - union select
+  - **DEPENDENT UNION**
+    - union select, .
+  - **UNION RESULT**
+    - union
+  - **SUBQUERY**
+    - select
+  - **DEPENDENT SUBQUERY**
+    - select, .
+  - **DERIVED**
+    - from
+
+### table
+
+-
+
+### type
+
+-
+- system const eq_ref ref ref_or_null index_mergy unique_subquery index_subquery range index ALL ( )
+-          ( 10)
+  1.  **system**
+      1.       ( ). const join
+  2.  **const**
+      1.
+      2.  PRIMARY KEY UNIQUE index
+      3.        ,
+  3.  **eq_ref**
+      1. const
+      2.
+      3. PRIMARY KEY UNIQUE index
+      4. =
+  4.  **ref**
+      1.
+      2. (leftmost prefix) PRIMARY KEY UNIQUE  
+         ( )
+      3.
+      4. ref =
+         1. ex 1)`createdAt between '2022-03-28' and '2022-03-28'`
+            createdAt = 2022-03-28 00:00:00 **ref**
+         2. ex 2)`createdAt between '2022-03-27' and '2022-03-28'`
+            createdAt 2022-03-27 00:00:00 and createdAt 2022-03-28 23:59:59 **ALL**
+  5.  **fulltext**
+      1. fulltext
+  6.  **ref_or_null**
+      1.  ref NULL
+      2.       (      )
+  7.  **index_merge**
+      1.
+      2. , key
+      3. key_len key
+  8.  **unique_subquery**
+      1. IN ref
+      2. unique_subquery index
+  9.  **index_subquery**
+      1. unique_subquery IN
+      2. , non-unique
+  10. **range**
+      1.
+      2. key :
+      3. key_len: key
+      4. ref : NULL
+      5. =, \<\>, \>, \>=, \<, \<=, IS NULL, \<=\>, BETWEEN IN
+  11. **index**
+      1.  ALL
+      2.         ALL
+      3.  MySQL
+  12. **ALL**
+      1.
+      2.  ( )
+      3.
+      4.       row    ALL
+
+### possible_keys
+
+- MySQL .
+
+### key
+
+- MySQL key .
+
+### key_len
+
+- MySQL . key NULL NULL.
+
+### ref
+
+-          .
+
+### rows
+
+-     MySQL     .     .
+
+### filtered
+
+- filetered . rows rows \* filtered / 100 .
+
+### Extra
+
+- MySQL .
+
+\> :
+\> [https://ibks-platform.tistory.com/374](https://ibks-platform.tistory.com/374)
+\> [ ]
+
+**[]**[[MySQL] MySQL Query Plan ](https://blog.naver.com/realuv/10184319823)|\*\*\*\*[realuv](https://blog.naver.com/realuv)
+
+\>
+
+UNIQUE 가 아닐때
+→ (즉 키값으로 단일행을 추출할수 없을때) 3. 사용된 키가 적은수의 행과 매치되면 이것은 적절한 조인 타입 4. ref 는 인덱스된 컬럼과 = 연산에서 사용됨 1. ex 1)`createdAt between '2022-03-28' and '2022-03-28'`
+→ 해당 쿼리는 결국 createdAt = ‘2022-03-28 00:00:00’ 과 같으므로 **ref** 로 나옴 2. ex 2)`createdAt between '2022-03-27' and '2022-03-28'`
+→ createdAt ≤ ‘2022-03-27 00:00:00’ and createdAt ≥ ‘2022-03-28 23:59:59’ 와 같으므로 **ALL** 로 나옴 5. **fulltext** 1. fulltext 색인을 사용하여 수행됨 6. **ref_or_null** 1. ref 와 같지만 NULL 값을 포함하는 행에대한 검색이 수반될 때 2. 서브쿼리 처리에서 대개 사용됨 (하위 쿼리를 해결하는 데 가장 자주 사용) 7. **index_merge** 1. 인덱스 병합 최적화가 적용되는 조인 타입 2. 이 경우, key 컬럼은 사용된 인덱스의 리스트를 나타내며 3. key_len 컬럼은 사용된 인덱스중 가장 긴 key 명을 나타냄 8. **unique_subquery** 1. 몇몇 IN 서브쿼리 처리에서 ref 타입대신 사용됨 2. unique_subquery 는 성능향상을 위해 서브쿼리를 단순 index 검색 함수로 대체함 9. **index_subquery** 1. unique_subquery 와 마찬가지로 IN 서브쿼리를 대체 2. 단, 서브쿼리에서 non-unique 인덱스가 사용될때 동작 함 10. **range** 1. 인덱스를 사용하여 주어진 범위 내의 행들만 추출 2. key 컬럼: 사용된 인덱스 3. key_len: 사용된 가장 긴 key 부분 4. ref 컬럼: 이 타입의 조인에서 NULL 5. 키 컬럼이 상수와 =, \<\>, \>, \>=, \<, \<=, IS NULL, \<=\>, BETWEEN 또는 IN 연산에 사용될때 적용됨 11. **index** 1. 인덱스가 스캔된다는걸 제외하면 ALL 과 같음 2. 일반적으로 인덱스 파일이 데이타파일보다 작기 때문에 ALL 보다는 빠름 3. MySQL 은 쿼리에서 단일 인덱스의 일부분인 컬럼을 사용할때 이 조인타입을 적용함 12. **ALL** 1. 이전 테이블과의 조인을 위해 풀스캔 2. (만약 조인에 쓰인) 첫번째 테이블이 고정이 아니라면 비효율적 3. 대부분의 경우에 아주 느린 성능 4. 보통 상수값이나 상수인 컬럼값으로 row를 추출하도록 인덱스를 추가하여 ALL 타입을 피할 수 있음
+
+### possible_keys
+
+- MySQL이 해당 테이블의 검색에 사용할 수 있는 인덱스들을 나타냅니다.
+
+### key
+
+- MySQL이 실제 사용한 key나 인덱스를 나타냅니다.
+
+### key_len
+
+- MySQL이 사용한 인덱스의 길이를 나타낸다. key 컬럼의 값이 NULL이면 이 컬럼의 값도 NULL입니다.
+
+### ref
+
+- 행을 추출하는 데 키와 함께 사용 된 컬럼이나 상수값을 나타냅니다.
+
+### rows
+
+- 이 값은 쿼리 수행에서 MySQL이 찾아야하는 데이터행 수의 예상값을 나타냅니다. 추정 수치이며 항상 정확하지 않다.
+
+### filtered
+
+- filetered열에 나타난 조건에 의해 필터링 될 테이블 행의 예상 비율을 나타낸다. 즉 rows는 검사 된 행 수를 나타내고 rows \* filtered / 100은 이전 테이블과 조인 될 행 수를 표시합니다.
+
+### Extra
+
+- MySQL이 이 쿼리를 어떻게 해석하는 지에 대한 추가 정보가 들어있습니다.
+
+\> 출처:
+\> [https://ibks-platform.tistory.com/374](https://ibks-platform.tistory.com/374)
+\> [남산 아래 개발자들]
+
+**[출처]** [[MySQL] MySQL Query Plan 보는 법](https://blog.naver.com/realuv/10184319823)|**작성자** [realuv](https://blog.naver.com/realuv)
+
+\>

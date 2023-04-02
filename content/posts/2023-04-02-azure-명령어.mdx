@@ -1,0 +1,33 @@
+---
+title: Azure 명령어
+slug: "/azure-명령어"
+date: 2023-04-02
+---
+
+# Azure 
+
+###   
+
+-      config   
+
+```bash
+az acr build -t nginx:latest --f Dockerfile-nginx -r devlinktalk.azurecr.io /Users/hyoj/RubymineProjects/link-talk-server-api
+```
+
+### log 
+
+```bash
+az webapp log download --name dev-link-talk-api --resource-group DEV-ALL-KR-C
+```
+
+###    
+
+```bash
+az webapp log tail --name dev-link-talk-api --resource-group DEV-ALL-KR-C
+
+# http   
+az webapp log tail --name dev-link-talk-api --resource-group DEV-ALL-KR-C --provider http
+```
+
+ tail --name dev-link-talk-api --resource-group DEV-ALL-KR-C --provider http
+```

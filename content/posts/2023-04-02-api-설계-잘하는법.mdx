@@ -1,0 +1,132 @@
+---
+title: API 설계 잘하는법
+slug: "/api-설계-잘하는법"
+date: 2023-03-18
+tags:
+  - API
+  - 설계
+---
+
+# API
+
+http
+
+status code, method, header(userAgent, Authorization, Encoding(MIME)
+
+(Idenpotent)
+
+URI ( )
+
+URL - URL
+
+### endpoint
+
+- scheme(http://, https://) + host + port
+
+### prefix
+
+- / \{\} / api /
+
+prefix -
+
+postfix -
+
+     auto increment   id
+
+- uuid .
+
+prefix URI () . ( )
+
+### Resource
+
+-
+
+-
+
+### table
+
+- user
+- pet
+
+### class
+
+User
+
+- users
+  - (Lisit\<User\> )
+
+Pet
+
+- pets
+
+### API
+
+- \<prefix\> / users /
+- \<prefix\> / pets /
+
+### -
+
+- () - GET
+  - \<prefix\> / users
+- k - GET
+  - \<prefix\> / users ? name=k
+- - GET
+  - \<prefix\> / users / \<uid\>
+- - POST
+  - \<prefix\> /users
+- - PUT
+- \<prefix\> / users / \<uid\>
+- - PUT
+- \<prefix\> / users
+- - DELETE
+  - \<prefix\> / users / \<uid\>
+
+### stauts code
+
+- URI . API
+  - 404
+-
+- 200 ,
+- - 400
+- DB
+  - 500
+-     ( )
+  - 502 (Bad Gateway)
+
+### basic auth
+
+-
+- Basic id:pass
+  - id:pass base64
+
+색 - GET - \<prefix\> / users ? name=k
+
+- 한명만 검색 - GET
+  - \<prefix\> / users / \<uid\>
+- 유저 추가 - POST
+  - \<prefix\> /users
+- 하나만 유저 수정 - PUT
+  - \<prefix\> / users / \<uid\>
+- 여러 유저 수정 - PUT
+  - \<prefix\> / users
+- 삭제 - DELETE
+  - \<prefix\> / users / \<uid\>
+
+### stauts code
+
+- URI가 없거나. API가 없거나
+  - 404
+- 검색하고자하는 유저 데이터가 없을때
+  - 200 을 주되, 유저정보가 없다는 메시지 출력
+- 유저가 파라미터빠트렸을때
+  - 400
+- 서버 DB 나 등등 서버에서 오류났을때
+  - 500
+- 로드밸런서나 엔진엑스에서 에러가 났을때 (게이트웨이에서 에러가남)
+  - 502 (Bad Gateway)
+
+### basic auth
+
+- 로그인같은 인증을 서버가 아닌 웹에서 처리하도록 한 인증방법
+- Basic id:pass 형태
+  - id:pass 는 base64 형태라서 걍 다 노출됨

@@ -1,0 +1,31 @@
+---
+title: newman cli
+slug: "/newman-cli"
+date: 2023-04-02
+---
+
+# newman cli
+
+###    
+
+```bash
+# -e:  , --environment
+newman run postman_collection.json -e postman_environment.json
+```
+
+###   &  html  
+
+```bash
+# -r: --reporter
+newman run postman_collection.json -e postman_environment.json -r htmlextra
+```
+
+###  html    
+
+```bash
+#   
+newman run postman_collection.json -e postman_environment.json -r htmlextra --reporter-htmlextra-export ./newdir/new_report.html
+```
+
+ction.json -e postman_environment.json -r htmlextra --reporter-htmlextra-export ./newdir/new_report.html
+```

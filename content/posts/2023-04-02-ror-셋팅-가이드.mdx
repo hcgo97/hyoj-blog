@@ -1,0 +1,3300 @@
+---
+title: RoR 셋팅 가이드
+slug: "/ror-셋팅-가이드"
+date: 2023-04-02
+---
+
+# RoR
+
+# README
+
+This README would normally document whatever steps are necessary to get the application up and running.
+
+Things you may want to cover:
+
+- Ruby version \> 3.0.3
+- Ruby on Rails version \> 7.0.1
+
+## 00. rbenv
+
+homebrew rbenv, ruby-build .
+
+```
+$ brew install rbenv ruby-build
+
+```
+
+.zshrc .
+
+```
+eval "$(rbenv init -)"
+
+$ source ~/.zshrc
+
+```
+
+## 01. ruby 3.0.3
+
+rbenv ruby 3.0.3 .
+
+```
+$ rbenv install 3.0.3
+
+$ rbenv global 3.0.3
+$ rbenv rehash
+
+$ ruby --version
+\> ruby 3.0.3p157 (2021-11-24 revision 3fb7d2cadc) [x86_64-darwin21]
+
+```
+
+## 10. Ruby on Rails Project
+
+Rails 7.0.1 Gem .
+
+```
+$ gem install rails -v '7.0.1'
+
+```
+
+RubyMine Ruby on Rails Project .
+
+1. New Project
+2. Rails API
+3. Location
+4. Ruby SDK 'rbenv: 3.0.3'
+5. Rails Version '7.0.1'
+6. Preconfigure for selected database: mysql
+7. Skip Test::Unit files
+
+## 11. Git flow
+
+Git flow Git flow .
+
+```
+$ git flow init
+
+```
+
+## 12. .gitignore
+
+gitignore.io `macOS`, `linux`, `Windows`, `RubyMine+all`, `Rails`,`dotenv` Project root .gitinore .
+
+## 13. Docker
+
+Project root `Dockerfile` `docker-compose.local.yml`, `.env.development.local` .
+
+Dockerfile docker-compose.local.yml .
+
+```
+# Dockerfile
+
+FROM ruby:3.0.3-alpine3.15 AS bundles
+
+RUN apk add --no-cache --update build-base mariadb-dev
+
+WORKDIR /app
+ADD Gemfile* /app/
+
+ENV BUNDLER_VERSION='2.2.32'
+RUN gem install bundler --no-document -v $BUNDLER_VERSION && \\
+    bundle install
+
+FROM ruby:3.0.3-alpine3.15 AS app
+
+RUN apk add --no-cache --update tzdata mariadb-dev less
+
+WORKDIR /app
+EXPOSE 3000
+ENV TZ Asia/Seoul
+ENV MALLOC_ARENA_MAX=2
+
+COPY --from=bundles /root/.bundle /root/.bundle
+COPY --from=bundles /usr/local/bundle /usr/local/bundle
+
+ADD . /app/
+
+```
+
+```
+# docker-compose.local.yml
+version: "3"
+
+volumes:
+  db-data:
+    external: false
+  redis-data:
+
+services:
+  db:
+    image: mysql:8.0.25
+    environment:
+      MYSQL_ROOT_PASSWORD: q12we34r
+      TZ: Asia/Seoul
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  redis:
+    image: redis:6.2.6-alpine3.15
+    command: redis-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  api:
+    depends_on:
+      - db
+      - redis
+      - sidekiq
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env.development.local
+    environment:
+      TZ: 'Asia/Seoul'
+    ports:
+      - "3000:3000"
+      - "1234:1234"
+    working_dir: /app
+    command: sh -c "bundle install && bin/rails db:migrate && bundle exec rails server -b 0.0.0.0 -p 3000 -e development"
+
+  sidekiq:
+    depends_on:
+      - db
+      - redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env.development.local
+    command: bundle exec sidekiq -C ./config/sidekiq.yml
+
+```
+
+```
+# .dockeringore
+Dockerfile
+log/
+tmp/
+
+```
+
+docker-compose.local.yml Dockerfile image .
+
+```
+$ docker compose -f docker-compose.local.yml build
+
+```
+
+Rubymine ruby SDK docker .
+
+1. ` + ,` Preference
+2. `sdk` `Languages & Frameworks \> Ruby SDK and gems`
+3. `+` `New remote...`
+4. `Docker Compose` `Configuration files` `docker-compose.local.yml`, `Service` `api`
+5. `Edit Path Mappings` `Local Path` Project root `Remote Path` `/app`
+
+## 20. Gemfile
+
+package bundler Gemfile Gem .
+
+.
+
+```bash
+# Gemfile
+# frozen_string_literal: true
+
+source "\<https://rubygems.org\>"
+git_source(:github) \{ |repo| "\<https://github.com/#\{repo\}.git\>" \}
+
+ruby "3.0.3"
+
+# Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
+gem "rails", "~\> 7.0.1"
+
+# Use mysql as the database for Active Record
+gem "mysql2", "~\> 0.5"
+
+# Use the Puma web server [\<https://github.com/puma/puma\>]
+gem "puma", "~\> 5.0"
+
+# Build JSON APIs with ease [\<https://github.com/rails/jbuilder\>]
+# gem "jbuilder"
+
+# Use Redis adapter to run Action Cable in production
+# gem "redis", "~\> 4.0"
+
+# Use Kredis to get higher-level data types in Redis [\<https://github.com/rails/kredis\>]
+# gem "kredis"
+
+# Use Active Model has_secure_password [\<https://guides.rubyonrails.org/active_model_basics.html#securepassword\>]
+gem "bcrypt", "~\> 3.1", "\>= 3.1.16"
+
+# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
+gem "tzinfo-data", platforms: %i[mingw mswin x64_mingw jruby]
+
+# Reduces boot times through caching; required in config/boot.rb
+gem "bootsnap", require: false
+
+# Use Active Storage variants [\<https://guides.rubyonrails.org/active_storage_overview.html#transforming-images\>]
+# gem "image_processing", "~\> 1.2"
+
+# Use Rack CORS for handling Cross-Origin Resource Sharing (CORS), making cross-origin AJAX possible
+gem "rack-cors"
+
+group :development, :test do
+  # See \<https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem\>
+  gem "debug", platforms: %i[mri mingw x64_mingw]
+
+  # rspec-rails is a testing framework for Rails 5+.
+  gem "rspec-rails", "~\> 5.0", "\>= 5.0.2"
+
+  # factory_bot_rails provides integration between factory_bot and rails 5.0 or newer
+  gem "factory_bot_rails", "~\> 6.2"
+
+  # Ffaker generates dummy data.
+  gem "ffaker", "~\> 2.20"
+
+  # Faker, a port of Data::Faker from Perl, is used to easily generate fake data: names, addresses, phone numbers, etc.
+  gem "faker", "~\> 2.19"
+
+  # Shoulda Matchers provides RSpec- and Minitest-compatible one-liners to test common Rails functionality that,
+  # if written by hand, would be much longer, more complex, and error-prone.
+  gem "shoulda-matchers", "~\> 5.1"
+
+  # RuboCop is a Ruby code style checking and code formatting tool.
+  # It aims to enforce the community-driven Ruby Style Guide.
+  gem "rubocop", "~\> 1.24", "\>= 1.24.1"
+
+  # Code style checking for RSpec files. A plugin for the RuboCop code style enforcing & linting tool.
+  gem "rubocop-rspec", "~\> 2.7"
+
+  # Automatic Rails code style checking tool.
+  # A RuboCop extension focused on enforcing Rails best practices and coding conventions.
+  gem "rubocop-rails", "~\> 2.13", "\>= 2.13.1"
+
+  # A collection of RuboCop cops to check for performance optimizations in Ruby code.
+  gem "rubocop-performance", "~\> 1.13", "\>= 1.13.1"
+
+  # A collection of RuboCop cops to check for downstream compatability issues in the Ruby code.
+  gem "rubocop-packaging", "~\> 0.5.1"
+
+  # Automatic Minitest code style checking tool.
+  # A RuboCop extension focused on enforcing Minitest best practices and coding conventions.
+  gem "rubocop-minitest", "~\> 0.17.0"
+
+  # An interface which glues ruby-debug to IDEs like Eclipse (RDT), NetBeans and RubyMine.
+  gem "ruby-debug-ide", "~\> 0.7.3"
+
+  # debase is a fast implementation of the standard Ruby debugger debug.rb for Ruby 2.0+.
+  # It is implemented by utilizing a new Ruby TracePoint class.
+  # The core component provides support that front-ends can build on.
+  # It provides breakpoint handling, bindings for stack frames among other things.
+  gem "debase", "~\> 0.2.5.beta2"
+end
+
+group :development do
+  # Speed up commands on slow machines / big apps [\<https://github.com/rails/spring\>]
+  gem "spring", "~\> 4.0"
+
+  # The Listen gem listens to file modifications and notifies you about the changes. Works everywhere!
+  gem "listen", "~\> 3.7"
+
+  # A thin and fast web server
+  gem "thin", "~\> 1.8", "\>= 1.8.1"
+end
+
+# Autoload dotenv in Rails.
+gem "dotenv-rails", "~\> 2.7", "\>= 2.7.6"
+
+# Use Pry as your rails console
+gem "pry-rails", "~\> 0.3.9"
+
+# ActiveModel::Serializers allows you to generate your JSON in an object-oriented and convention-driven manner.
+gem "active_model_serializers", "~\> 0.10.13"
+
+# Kaminari is a Scope & Engine based, clean, powerful, agnostic, customizable and sophisticated paginator for Rails 4+
+gem "kaminari", "~\> 1.2", "\>= 1.2.2"
+
+# ActiveInteraction manages application-specific business logic.
+# It is an implementation of the command pattern in Ruby.
+gem "active_interaction", "~\> 4.1"
+
+# A pure ruby implementation of the RFC 7519 OAuth JSON Web Token (JWT) standard.
+gem "jwt", "~\> 2.3"
+
+# Extraction of the key_transform abilities of ActiveModelSerializers
+gem "case_transform", "~\> 0.2"
+
+# Simple, efficient background processing for Ruby.
+gem "sidekiq", "~\> 6.3", "\>= 6.3.1"
+
+# Enables to set jobs to be run in specified time (using CRON notation)
+gem "sidekiq-cron", "~\> 1.2"
+
+# A library which implements the OneSignal API.
+gem "one_signal", "~\> 1.2", "\>= 1.2.2"
+
+# HTTP/REST API client library.
+gem "faraday", "~\> 1.9", "\>= 1.9.3"
+
+# Object oriented authorization for Rails applications
+gem "pundit", "~\> 2.1", "\>= 2.1.1"
+
+# Check the home page for more in-depth information.
+gem "acts_as_paranoid", "~\> 0.8.0"
+
+# Object geocoding (by street or IP address), reverse geocoding (coordinates to street address),
+# distance queries for ActiveRecord and Mongoid, result caching, and more.
+# Designed for Rails but works with Sinatra and other Rack frameworks too.
+gem "geocoder", "~\> 1.7", "\>= 1.7.2"
+
+# ActiveModel Serializers addon for eliminating N+1 queries problem from the serializers.
+gem "ams_lazy_relationships", "~\> 0.3.2"
+
+# A set of common locale data and translations to internationalize and/or localize your Rails applications.
+gem "rails-i18n", "~\> 7.0", "\>= 7.0.1"
+
+# Official AWS Ruby gem for Amazon Simple Storage Service (Amazon S3). This gem is part of the AWS SDK for Ruby.
+gem "aws-sdk-s3", "~\> 1.111", "\>= 1.111.1"
+
+# Ruby anywhere in the world in 250ms with PubNub!
+gem "pubnub", "~\> 4.8"
+
+# A Ruby wrapper for the OAuth 2.0 protocol built with a similar style to the original OAuth spec.
+gem "oauth2", "~\> 1.4", "\>= 1.4.7"
+
+# Semantic Version utility class for parsing, storing, and comparing versions. See: \<http://semver.org\>
+gem "semantic", "~\> 1.6", "\>= 1.6.1"
+
+```
+
+`docker compose -f docker-compose.local.yml` `bundle install` .
+
+## 21. rubocop
+
+ruby lint rubocop .
+
+1. project root .rubocop.yml
+2. ```yaml
+   # .rubocop.yml
+   require:
+     - rubocop-minitest
+     - rubocop-packaging
+     - rubocop-performance
+     - rubocop-rails
+     - rubocop-rspec
+
+   AllCops:
+     TargetRubyVersion: 3.1
+     # RuboCop has a bunch of cops enabled by default. This setting tells RuboCop
+     # to ignore them, so only the ones explicitly set in this file are enabled.
+     DisabledByDefault: true
+     SuggestExtensions: false
+     Exclude:
+       - "**/tmp/**/*"
+       - "**/templates/**/*"
+       - "**/vendor/**/*"
+       - "actionpack/lib/action_dispatch/journey/parser.rb"
+       - "actionmailbox/test/dummy/**/*"
+       - "actiontext/test/dummy/**/*"
+       - "**/node_modules/**/*"
+
+   Performance:
+     Exclude:
+       - "**/test/**/*"
+
+   # Prefer assert_not over assert !
+   Rails/AssertNot:
+     Include:
+       - "**/test/**/*"
+
+   # Prefer assert_not_x over refute_x
+   Rails/RefuteMethods:
+     Include:
+       - "**/test/**/*"
+
+   Rails/IndexBy:
+     Enabled: true
+
+   Rails/IndexWith:
+     Enabled: true
+
+   # Prefer &&/|| over and/or.
+   Style/AndOr:
+     Enabled: true
+
+   # Align `when` with `case`.
+   Layout/CaseIndentation:
+     Enabled: true
+
+   Layout/ClosingHeredocIndentation:
+     Enabled: true
+
+   Layout/ClosingParenthesisIndentation:
+     Enabled: true
+
+   # Align comments with method definitions.
+   Layout/CommentIndentation:
+     Enabled: true
+
+   Layout/ElseAlignment:
+     Enabled: true
+
+   # Align `end` with the matching keyword or starting expression except for
+   # assignments, where it should be aligned with the LHS.
+   Layout/EndAlignment:
+     Enabled: true
+     EnforcedStyleAlignWith: variable
+     AutoCorrect: true
+
+   Layout/EndOfLine:
+     Enabled: true
+
+   Layout/EmptyLineAfterMagicComment:
+     Enabled: true
+
+   Layout/EmptyLinesAroundAccessModifier:
+     Enabled: true
+     EnforcedStyle: only_before
+
+   Layout/EmptyLinesAroundBlockBody:
+     Enabled: true
+
+   # In a regular class definition, no empty lines around the body.
+   Layout/EmptyLinesAroundClassBody:
+     Enabled: true
+
+   # In a regular method definition, no empty lines around the body.
+   Layout/EmptyLinesAroundMethodBody:
+     Enabled: true
+
+   # In a regular module definition, no empty lines around the body.
+   Layout/EmptyLinesAroundModuleBody:
+     Enabled: true
+
+   # Use Ruby \>= 1.9 syntax for hashes. Prefer \{ a: :b \} over \{ :a =\> :b \}.
+   Style/HashSyntax:
+     Enabled: true
+
+   # Method definitions after `private` or `protected` isolated calls need one
+   # extra level of indentation.
+   Layout/IndentationConsistency:
+     Enabled: true
+     EnforcedStyle: indented_internal_methods
+
+   # Two spaces, no tabs (for indentation).
+   Layout/IndentationWidth:
+     Enabled: true
+
+   Layout/LeadingCommentSpace:
+     Enabled: true
+
+   Layout/SpaceAfterColon:
+     Enabled: true
+
+   Layout/SpaceAfterComma:
+     Enabled: true
+
+   Layout/SpaceAfterSemicolon:
+     Enabled: true
+
+   Layout/SpaceAroundEqualsInParameterDefault:
+     Enabled: true
+
+   Layout/SpaceAroundKeyword:
+     Enabled: true
+
+   Layout/SpaceAroundOperators:
+     Enabled: true
+
+   Layout/SpaceBeforeComma:
+     Enabled: true
+
+   Layout/SpaceBeforeComment:
+     Enabled: true
+
+   Layout/SpaceBeforeFirstArg:
+     Enabled: true
+
+   Style/DefWithParentheses:
+     Enabled: true
+
+   # Defining a method with parameters needs parentheses.
+   Style/MethodDefParentheses:
+     Enabled: true
+
+   Style/ExplicitBlockArgument:
+     Enabled: true
+
+   Style/FrozenStringLiteralComment:
+     Enabled: true
+     EnforcedStyle: always
+     Exclude:
+       - "actionview/test/**/*.builder"
+       - "actionview/test/**/*.ruby"
+       - "actionpack/test/**/*.builder"
+       - "actionpack/test/**/*.ruby"
+       - "activestorage/db/migrate/**/*.rb"
+       - "activestorage/db/update_migrate/**/*.rb"
+       - "actionmailbox/db/migrate/**/*.rb"
+       - "actiontext/db/migrate/**/*.rb"
+
+   Style/RedundantFreeze:
+     Enabled: true
+
+   # Use `foo \{\}` not `foo\{\}`.
+   Layout/SpaceBeforeBlockBraces:
+     Enabled: true
+
+   # Use `foo \{ bar \}` not `foo \{bar\}`.
+   Layout/SpaceInsideBlockBraces:
+     Enabled: true
+     EnforcedStyleForEmptyBraces: space
+
+   # Use `\{ a: 1 \}` not `\{a:1\}`.
+   Layout/SpaceInsideHashLiteralBraces:
+     Enabled: true
+
+   Layout/SpaceInsideParens:
+     Enabled: true
+
+   # Check quotes usage according to lint rule below.
+   Style/StringLiterals:
+     Enabled: true
+     EnforcedStyle: double_quotes
+
+   # Detect hard tabs, no hard tabs.
+   Layout/IndentationStyle:
+     Enabled: true
+
+   # Empty lines should not have any spaces.
+   Layout/TrailingEmptyLines:
+     Enabled: true
+
+   # No trailing whitespace.
+   Layout/TrailingWhitespace:
+     Enabled: true
+
+   # Use quotes for string literals when they are enough.
+   Style/RedundantPercentQ:
+     Enabled: true
+
+   Lint/AmbiguousOperator:
+     Enabled: true
+
+   Lint/AmbiguousRegexpLiteral:
+     Enabled: true
+
+   Lint/DuplicateRequire:
+     Enabled: true
+
+   Lint/DuplicateMethods:
+     Enabled: true
+
+   Lint/ErbNewArguments:
+     Enabled: true
+
+   # Use my_method(my_arg) not my_method( my_arg ) or my_method my_arg.
+   Lint/RequireParentheses:
+     Enabled: true
+
+   Lint/RedundantStringCoercion:
+     Enabled: true
+
+   Lint/UriEscapeUnescape:
+     Enabled: true
+
+   Lint/UselessAssignment:
+     Enabled: true
+
+   Lint/DeprecatedClassMethods:
+     Enabled: true
+
+   Style/ParenthesesAroundCondition:
+     Enabled: true
+
+   Style/HashTransformKeys:
+     Enabled: true
+
+   Style/HashTransformValues:
+     Enabled: true
+
+   Style/RedundantBegin:
+     Enabled: true
+
+   Style/RedundantReturn:
+     Enabled: true
+     AllowMultipleReturnValues: true
+
+   Style/RedundantRegexpEscape:
+     Enabled: true
+
+   Style/Semicolon:
+     Enabled: true
+     AllowAsExpressionSeparator: true
+
+   # Prefer Foo.method over Foo::method
+   Style/ColonMethodCall:
+     Enabled: true
+
+   Style/TrivialAccessors:
+     Enabled: true
+
+   Performance/BindCall:
+     Enabled: true
+
+   Performance/FlatMap:
+     Enabled: true
+
+   Performance/MapCompact:
+     Enabled: true
+
+   Performance/SelectMap:
+     Enabled: true
+
+   Performance/RedundantMerge:
+     Enabled: true
+
+   Performance/StartWith:
+     Enabled: true
+
+   Performance/EndWith:
+     Enabled: true
+
+   Performance/RegexpMatch:
+     Enabled: true
+
+   Performance/ReverseEach:
+     Enabled: true
+
+   Performance/StringReplacement:
+     Enabled: true
+
+   Performance/UnfreezeString:
+     Enabled: true
+
+   Performance/DeletePrefix:
+     Enabled: true
+
+   Performance/DeleteSuffix:
+     Enabled: true
+
+   Minitest/UnreachableAssertion:
+     Enabled: true
+   ```
+
+3. ` + ,` Preference
+4. `rubocop` `Editor \> Inspections`
+5. `Gems and gem management \> Rubocop` `Run 'rubocop -a' on save`
+
+## 22. rails master key
+
+Ruby on Rails master.key credentials.yml.enc .
+
+- .
+- Rails project 3, 4 .
+
+1. master.key, credentials.yml.enc
+
+   ```bash
+   rm -rf ./config/master.key ./config/credentials.yml.enc
+
+   ```
+
+2. ```bash
+   rails credentials:edit
+
+   ```
+
+3. master.key .env.development.local
+
+   ```yaml
+   # .env.development.local
+   RAILS_MASTER_KEY="$\{master.key\}"
+   ```
+
+4. master.key
+
+   ```bash
+   rm -rf ./config/master.key
+
+   ```
+
+## 23. Database
+
+local .
+
+1. config/database.yml
+
+   ```yaml
+   # dabase.yml
+   development:
+     url: \<%= ENV['DATABASE_URL'] %\>
+
+   test:
+     url: \<%= ENV['TEST_DATABASE_URL'] %\>
+
+   production:
+     url: \<%= ENV['DATABASE_URL'] %\>
+   ```
+
+2. .env.development.local
+
+   - : `mysql2://$\{database user\}:$\{database password\}@$\{database url\}:$\{database port\}/$\{database scheme name\}?pool=10&encoding=utf8mb4&collation=utf8mb4_general_ci&timeout=60000`
+
+   ```yaml
+   DATABASE_URL="mysql2://root:q12we34r@db:3306/ror_template?pool=10&encoding=utf8mb4&collation=utf8mb4_general_ci&timeout=60000"
+   TEST_DATABASE_URL="mysql2://root:q12we34r@db:3306/ror_template_test?pool=10&encoding=utf8mb4&collation=utf8mb4_general_ci&timeout=60000"
+   ```
+
+3. ```ruby
+   rake db:create
+   ```
+
+## 24. Ruby on Rails Application
+
+.
+
+1.  `config/application.rb`, `config/environments/development.rb`, `config/environments/production.rb`
+    , `config/environments/test.rb`
+
+    ````ruby # config/application.rb # frozen_string_literal: true
+
+        require_relative "boot"
+
+        require "rails"
+        # Pick the frameworks you want:
+        require "active_model/railtie"
+        require "active_job/railtie"
+        require "active_record/railtie"
+        require "active_storage/engine"
+        require "action_controller/railtie"
+        require "action_mailer/railtie"
+        require "action_mailbox/engine"
+        require "action_text/engine"
+        require "action_view/railtie"
+        require "action_cable/engine"
+        # require "rails/test_unit/railtie"
+
+        # Require the gems listed in Gemfile, including any gems
+        # you've limited to :test, :development, or :production.
+        Bundler.require(*Rails.groups)
+
+        Dotenv::Railtie.load
+
+        module RubyOnRailsTemplate
+           class Application \< Rails::Application
+              # Initialize configuration defaults for originally generated Rails version.
+              config.load_defaults 7.0
+
+              # Configuration for the application, engines, and railties goes here.
+              #
+              # These settings can be overridden in specific environments using the files
+              # in config/environments, which are processed later.
+              #
+              # config.time_zone = "Central Time (US & Canada)"
+              # config.eager_load_paths \<\< Rails.root.join("extras")
+
+              # Only loads a smaller set of middleware suitable for API only apps.
+              # Middleware like session, flash, cookies can be added back manually.
+              # Skip views, helpers and assets when generating a new resource.
+              config.api_only = true
+
+              config.autoload_paths += [Rails.root.join("app/services/concern"), Rails.root.join("app/errors")]
+              config.time_zone = "Asia/Seoul"
+              config.active_record.default_timezone = :local
+
+              config.hosts.clear
+
+              if ENV["RAILS_LOG_TO_STDOUT"].present?
+                 logger           = ActiveSupport::Logger.new(STDOUT)
+                 logger.formatter = config.log_formatter
+                 config.logger    = ActiveSupport::TaggedLogging.new(logger)
+              end
+
+              # TODO:
+              config.x.auth.access_token_ttl_in_seconds = 180.day.to_i
+              config.x.auth.refresh_token_ttl_in_seconds = 60.days.to_i
+
+              config.x.auth.secret_key = ENV.fetch("AUTH_SECRET_KEY", "")
+              config.x.auth.signing_algorithm = ENV.fetch("AUTH_SIGNING_ALGORITHM", "")
+
+              config.action_dispatch.show_exceptions = true
+              config.exceptions_app = self.routes
+
+              config.active_job.queue_adapter = :sidekiq
+
+              config.generators do |g|
+                 g.test_framework :rspec,
+                                  request_specs: false,
+                                  view_specs: false,
+                                  routing_specs: false,
+                                  helper_specs: false,
+                                  generator_specs: false,
+                                  controller_specs: true
+              end
+
+              require Rails.root.join("lib/middlewares/handle_bad_request")
+              config.middleware.insert_after ActionDispatch::DebugExceptions, Middleware::HandleBadRequest
+
+              config.i18n.load_path += Dir[Rails.root.join("config", "locales", "**", "*.\{rb,yml\}")]
+              config.i18n.available_locales = [:ko]
+              config.i18n.default_locale = :ko
+
+              OneSignal::OneSignal.user_auth_key = ENV["ONE_SIGNAL_USER_AUTH_KEY"]
+              OneSignal::OneSignal.api_key = ENV["ONE_SIGNAL_API_KEY"]
+
+              config.x.oauth.client_id = ENV["ARM_CLIENT_ID"]
+              config.x.oauth.client_secret = ENV["ARM_CLIENT_SECRET"]
+              config.x.oauth.idp_url = ENV["ARM_IDP_URL"]
+              config.x.oauth.redirect_uri = ENV["ARM_REDIRECT_URI"]
+              config.x.oauth.hmac = ENV["ARM_HMAC_SECRET"]
+           end
+        end
+
+        ```
+
+        ```ruby
+        # config/environments/development.rb
+        # frozen_string_literal: true
+
+        require "active_support/core_ext/integer/time"
+
+        Rails.application.configure do
+           # Settings specified here will take precedence over those in config/application.rb.
+
+           # In the development environment your application's code is reloaded any time
+           # it changes. This slows down response time but is perfect for development
+           # since you don't have to restart the web server when you make code changes.
+           config.cache_classes = false
+
+           # Do not eager load code on boot.
+           config.eager_load = false
+
+           # Show full error reports.
+           config.consider_all_requests_local = false
+
+           # Enable server timing
+           config.server_timing = true
+
+           # Enable/disable caching. By default caching is disabled.
+           # Run rails dev:cache to toggle caching.
+           if Rails.root.join("tmp/caching-dev.txt").exist?
+              config.cache_store = :memory_store
+              config.public_file_server.headers = \{
+                      "Cache-Control" =\> "public, max-age=#\{2.days.to_i\}"
+              \}
+           else
+              config.action_controller.perform_caching = false
+
+              config.cache_store = :null_store
+           end
+
+           # Store uploaded files on the local file system (see config/storage.yml for options).
+           config.active_storage.service = :local
+
+           # Don't care if the mailer can't send.
+           config.action_mailer.raise_delivery_errors = false
+
+           config.action_mailer.perform_caching = false
+
+           # Print deprecation notices to the Rails logger.
+           config.active_support.deprecation = :log
+
+           # Raise exceptions for disallowed deprecations.
+           config.active_support.disallowed_deprecation = :raise
+
+           # Tell Active Support which deprecation messages to disallow.
+           config.active_support.disallowed_deprecation_warnings = []
+
+           # Raise an error on page load if there are pending migrations.
+           config.active_record.migration_error = :page_load
+
+           # Highlight code that triggered database queries in logs.
+           config.active_record.verbose_query_logs = true
+
+           if ENV["RAILS_LOG_TO_STDOUT"].present?
+              logger           = ActiveSupport::Logger.new(STDOUT)
+              logger.formatter = config.log_formatter
+              config.logger    = ActiveSupport::TaggedLogging.new(logger)
+           end
+
+           # Raises error for missing translations.
+           # config.i18n.raise_on_missing_translations = true
+
+           # Annotate rendered view with file names.
+           # config.action_view.annotate_rendered_view_with_filenames = true
+
+           # Uncomment if you wish to allow Action Cable access from any origin.
+           # config.action_cable.disable_request_forgery_protection = true
+
+           config.file_watcher = ActiveSupport::EventedFileUpdateChecker
+        end
+
+        ```
+
+        ```ruby
+        # config/environments/production.rb
+        # frozen_string_literal: true
+
+        require "active_support/core_ext/integer/time"
+
+        Rails.application.configure do
+          # Settings specified here will take precedence over those in config/application.rb.
+
+          # Code is not reloaded between requests.
+          config.cache_classes = true
+
+          # Eager load code on boot. This eager loads most of Rails and
+          # your application in memory, allowing both threaded web servers
+          # and those relying on copy on write to perform better.
+          # Rake tasks automatically ignore this option for performance.
+          config.eager_load = true
+
+          # Full error reports are disabled and caching is turned on.
+          config.consider_all_requests_local = false
+
+          # Ensures that a master key has been made available in either ENV["RAILS_MASTER_KEY"]
+          # or in config/master.key. This key is used to decrypt credentials (and other encrypted files).
+          # config.require_master_key = true
+
+          # Disable serving static files from the `/public` folder by default since
+          # Apache or NGINX already handles this.
+          config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
+
+          # Enable serving of images, stylesheets, and JavaScripts from an asset server.
+          # config.asset_host = "\<http://assets.example.com\>"
+
+          # Specifies the header that your server uses for sending files.
+          # config.action_dispatch.x_sendfile_header = "X-Sendfile" # for Apache
+          # config.action_dispatch.x_sendfile_header = "X-Accel-Redirect" # for NGINX
+
+          # Store uploaded files on the local file system (see config/storage.yml for options).
+          config.active_storage.service = :local
+
+          # Mount Action Cable outside main process or domain.
+          # config.action_cable.mount_path = nil
+          # config.action_cable.url = "wss://example.com/cable"
+          # config.action_cable.allowed_request_origins = [ "\<http://example.com\>", /http:\\/\\/example.*/ ]
+
+          # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
+          # config.force_ssl = true
+
+          # Include generic and useful information about system operation, but avoid logging too much
+          # information to avoid inadvertent exposure of personally identifiable information (PII).
+          config.log_level = :info
+
+          # Prepend all log lines with the following tags.
+          config.log_tags = [:request_id]
+
+          # Use a different cache store in production.
+          # config.cache_store = :mem_cache_store
+
+          # Use a real queuing backend for Active Job (and separate queues per environment).
+          # config.active_job.queue_adapter     = :resque
+          # config.active_job.queue_name_prefix = "ruby_on_rails_template_production"
+
+          config.action_mailer.perform_caching = false
+
+          # Ignore bad email addresses and do not raise email delivery errors.
+          # Set this to true and configure the email server for immediate delivery to raise delivery errors.
+          # config.action_mailer.raise_delivery_errors = false
+
+          # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
+          # the I18n.default_locale when a translation cannot be found).
+          config.i18n.fallbacks = true
+
+          # Don't log any deprecations.
+          config.active_support.report_deprecations = false
+
+          # Use default logging formatter so that PID and timestamp are not suppressed.
+          config.log_formatter = ::Logger::Formatter.new
+
+          # Use a different logger for distributed setups.
+          # require "syslog/logger"
+          # config.logger = ActiveSupport::TaggedLogging.new(Syslog::Logger.new "app-name")
+
+          # Do not dump schema after migrations.
+          config.active_record.dump_schema_after_migration = false
+        end
+
+        ```
+
+        ```ruby
+        # config/environments/test.rb
+        # frozen_string_literal: true
+
+        require "active_support/core_ext/integer/time"
+
+        # The test environment is used exclusively to run your application's
+        # test suite. You never need to work with it otherwise. Remember that
+        # your test database is "scratch space" for the test suite and is wiped
+        # and recreated between test runs. Don't rely on the data there!
+
+        Rails.application.configure do
+          # Settings specified here will take precedence over those in config/application.rb.
+
+          # Turn false under Spring and add config.action_view.cache_template_loading = true.
+          config.cache_classes = true
+          config.action_view.cache_template_loading = true
+
+          # Eager loading loads your whole application. When running a single test locally,
+          # this probably isn't necessary. It's a good idea to do in a continuous integration
+          # system, or in some way before deploying your code.
+          config.eager_load = ENV["CI"].present?
+
+          # Configure public file server for tests with Cache-Control for performance.
+          config.public_file_server.enabled = true
+          config.public_file_server.headers = \{
+            "Cache-Control" =\> "public, max-age=#\{1.hour.to_i\}"
+          \}
+
+          # Show full error reports and disable caching.
+          config.consider_all_requests_local       = true
+          config.action_controller.perform_caching = false
+          config.cache_store = :null_store
+
+          # Raise exceptions instead of rendering exception templates.
+          config.action_dispatch.show_exceptions = false
+
+          # Disable request forgery protection in test environment.
+          config.action_controller.allow_forgery_protection = false
+
+          # Store uploaded files on the local file system in a temporary directory.
+          config.active_storage.service = :test
+
+          config.action_mailer.perform_caching = false
+
+          # Tell Action Mailer not to deliver emails to the real world.
+          # The :test delivery method accumulates sent emails in the
+          # ActionMailer::Base.deliveries array.
+          config.action_mailer.delivery_method = :test
+
+          # Print deprecation notices to the stderr.
+          config.active_support.deprecation = :stderr
+
+          # Raise exceptions for disallowed deprecations.
+          config.active_support.disallowed_deprecation = :raise
+
+          # Tell Active Support which deprecation messages to disallow.
+          config.active_support.disallowed_deprecation_warnings = []
+
+          # Raises error for missing translations.
+          # config.i18n.raise_on_missing_translations = true
+
+          # Annotate rendered view with file names.
+          # config.action_view.annotate_rendered_view_with_filenames = true
+        end
+
+        ```
+
+    ````
+
+2.  lib/middlewares/handle_bad_request.rb
+
+    ```ruby
+    # lib/middlewares/handle_bad_request.rb
+    # frozen_string_literal: true
+
+    module Middleware
+      class HandleBadRequest
+        def initialize(app)
+          @app = app
+        end
+
+        def call(env)
+          @app.call(env)
+        rescue ActionDispatch::Http::Parameters::ParseError =\> error
+          error_output = "There was a problem in the JSON you submitted: #\{error\}"
+          require "faraday"
+          req = Rack::Request.new(env)
+          Faraday.post(req.base_url + "/400", \{ error: error.to_s, request_was: req.body.string \})
+
+          [
+            302, \{ "Location" =\> "/400" \}, ["Bad Request: #\{error_output\}"]
+          ]
+        end
+      end
+    end
+    ```
+
+3.  .env.development.local
+
+    ```yaml
+    RAILS_LOG_TO_STDOUT="true"
+
+    # JWT
+    AUTH_SECRET_KEY="$\{jwt secret key\}"
+    AUTH_SIGNING_ALGORITHM="$\{jwt signing \}"
+
+    # one signal
+    ONE_SIGNAL_USER_AUTH_KEY=""
+    ONE_SIGNAL_API_KEY=""
+
+    # ARM
+    ARM_CLIENT_ID=""
+    ARM_CLIENT_SECRET=""
+    ARM_REDIRECT_URI=""
+    ARM_IDP_URL=""
+    ARM_HMAC_SECRET=""
+    ```
+
+## 24. Ruby on Rails initializers
+
+config/initializers .
+
+1. config/initializers/application_controller_renderer.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   class HashSerializer \< ActiveModel::Serializer
+     attributes :hash
+
+     #    ActiveModel::Serializer  to_s  .
+     def hash
+       object.hash
+     end
+
+     def serializable_hash(instance_options, options, context)
+       hash
+     end
+   end
+
+   class HashResource \< ActiveModelSerializers::Model
+     attributes :hash
+   end
+
+   ActiveSupport.on_load(:action_controller) do
+     ActiveModelSerializers.config.key_transform = :camel_lower
+     ActiveModelSerializers.config.default_api_version = "1.0"
+
+     ActionController::Renderers.add :api do |json, options|
+       options[:type] = :api
+       options[:adapter] = GoogleJsonStyleGuideAdapter
+       options.fetch(:serialization_context) do
+         options[:serialization_context] = ActiveModelSerializers::SerializationContext.new(request)
+       end
+
+       if json.nil?
+         json = \{ status: 404, code: I18n.t("base_errors.record_not_found.code"),
+                 message: I18n.t("base_errors.record_not_found.message") \}
+         options[:type] = :error
+         options[:status] = 404
+       end
+
+       if json.instance_of?(Hash)
+         json = HashResource.new(hash: json)
+         options[:serializer] = HashSerializer
+       end
+
+       response_body = get_serializer(json, options).to_json(options) unless json.is_a?(String)
+       self.content_type = Mime[:json]
+       self.response_body = response_body
+       self.status = options.fetch(:status, 200)
+       response_body
+     end
+
+     ActionController::Renderers.add :error do |json, options|
+       raise "error[:status] is not specified" unless json[:status]
+       options[:type] = :error
+       options[:adapter] = GoogleJsonStyleGuideAdapter
+       options.fetch(:serialization_context) do
+         options[:serialization_context] = ActiveModelSerializers::SerializationContext.new(request)
+       end
+
+       resource = HashResource.new(hash: json)
+       options[:serializer] = HashSerializer
+
+       response_body = get_serializer(resource, options).to_json(options) unless json.is_a?(String)
+       self.content_type = Mime[:json]
+       self.response_body = response_body
+       self.status = options.fetch(:status, json[:status])
+       response_body
+     end
+   end
+
+   ```
+
+2. config/initializers/backtrace_silencers.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   # Be sure to restart your server when you modify this file.
+
+   # You can add backtrace silencers for libraries that you're using but don't wish to see in your backtraces.
+   # Rails.backtrace_cleaner.add_silencer \{ |line| /my_noisy_library/.match?(line) \}
+
+   # You can also remove all the silencers if you're trying to debug a problem that might stem from framework code
+   # by setting BACKTRACE=1 before calling your invocation, like "BACKTRACE=1 ./bin/rails runner 'MyClass.perform'".
+   Rails.backtrace_cleaner.remove_silencers! if ENV["BACKTRACE"]
+
+   ```
+
+3. config/initializers/cors.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   # Be sure to restart your server when you modify this file.
+
+   # Avoid CORS issues when API is called from the frontend app.
+   # Handle Cross-Origin Resource Sharing (CORS) in order to accept cross-origin AJAX requests.
+
+   # Read more: \<https://github.com/cyu/rack-cors\>
+
+   Rails.application.config.middleware.insert_before 0, Rack::Cors do
+     allow do
+       origins "*"
+
+       resource "*",
+         headers: :any,
+         methods: [:get, :post, :put, :patch, :delete, :options, :head]
+     end
+   end
+
+   ```
+
+4. config/initializers/fake_one_signal_notification.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   if Rails.env.test?
+     require Rails.root.join("spec/support/fake_one_signal_notification")
+     OneSignal::Notification = FakeOneSignalNotification
+   end
+
+   ```
+
+5. config/initializers/redis.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   Rails.application.configure do
+     url = ENV.fetch("REDIS_DSN")
+     if url.blank?
+       throw Redis::CannotConnectError.new
+     end
+     config.redis = Redis.new(url: url)
+   end
+
+   ```
+
+6. config/initializers/sens_alim_talk.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require "sens_alim_talk"
+
+   SensAlimTalk::Client.configure do |config|
+     config.access_key = ENV["NCLOUD_ACCESS_KEY"]
+     config.secret_key = ENV["NCLOUD_SECRET_KEY"]
+     config.service_id = ENV["NCLOUD_ALIM_TALK_SERVICE_ID"]
+     config.plus_friend_id = ENV["NCLOUD_ALIM_TALK_PLUS_FRIEND_ID"]
+   end
+
+   ```
+
+7. config/initializers/sens_sms.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   require "sens_sms"
+
+   SensSms::Client.configure do |config|
+     config.access_key = ENV["NCLOUD_ACCESS_KEY"]
+     config.secret_key = ENV["NCLOUD_SECRET_KEY"]
+     config.service_id = ENV["NCLOUD_SMS_SERVICE_ID"]
+   end
+
+   ```
+
+8. config/initializers/sidekiq.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   Sidekiq.configure_server do |config|
+     config.redis = \{ url: ENV.fetch("REDIS_SIDEKIQ_DSN", "") \}
+
+     schedule_file = "config/_schedule.yml"
+     Sidekiq::Cron::Job.load_from_hash! YAML.load_file(schedule_file) if File.exist?(schedule_file)
+   end
+
+   Sidekiq.configure_client do |config|
+     config.redis = \{ url: ENV.fetch("REDIS_SIDEKIQ_DSN", "") \}
+   end
+
+   Sidekiq.logger = Logger.new(STDOUT)
+
+   if ENV["SIDEKIQ_TESTING"] || Rails.env.test?
+     require "sidekiq/testing"
+     Sidekiq::Testing.inline!
+   end
+
+   ```
+
+9. config/initializers/wrap_parameters.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   # Be sure to restart your server when you modify this file.
+
+   # This file contains settings for ActionController::ParamsWrapper which
+   # is enabled by default.
+
+   # Enable parameter wrapping for JSON. You can disable this by setting :format to an empty array.
+   ActiveSupport.on_load(:action_controller) do
+      wrap_parameters format: [:json]
+   end
+
+   # To enable root element in JSON for ActiveRecord objects.
+   # ActiveSupport.on_load(:active_record) do
+   #   self.include_root_in_json = true
+   # end
+
+   ```
+
+10. app/serializers/google_json_style_guide_adapter.rb
+
+```ruby
+# frozen_string_literal: true
+
+class GoogleJsonStyleGuideAdapter \< ActiveModelSerializers::Adapter::Base
+  def serializable_hash(options = \{ type: :api \})
+    options = serialization_options(options)
+    options[:fields] ||= instance_options[:fields]
+    @serialized = serializer.serializable_hash(instance_options, options, self)
+
+    api_version = options.fetch(:api_version, ActiveModelSerializers.config.default_api_version)
+    params = options.fetch(:params, \{\})
+
+    @document = \{
+      api_version: api_version,
+      params: params
+    \}
+
+    if options[:type] == :error
+      @error = @serialized
+      build_error
+    else
+      build_data
+    end
+
+    self.class.transform_key_casing!(@document, instance_options)
+  end
+
+  protected
+    def build_error
+      # message      HTTP Status
+      # code:
+      raise "in Error hash, :status is mandatory." unless @error[:status]
+      @error[:status] = Rack::Utils.status_code(@error[:status])
+      @error[:code] = @error[:code]
+      @error[:message] ||= Rack::Utils::HTTP_STATUS_CODES[@error[:status]]
+      @error[:debug_context] = @error[:context]
+      @document[:error] = @error.slice(:status, :code, :message, :context)
+    end
+
+    def build_data
+      if @serialized.is_a? Array
+        @document[:data] = datum
+      else
+        @document[:data] = @serialized
+      end
+    end
+
+    def datum
+      # object  kaminari
+      #    serializer.object
+      total_count = if serializer.object.respond_to?(:total_count)
+        serializer.object.total_count
+      else
+        @serialized.size
+      end
+
+      @document[:data] = \{
+        total_items: total_count,
+        size: @serialized.size,
+        items: @serialized
+      \}
+    end
+end
+
+```
+
+1. config/sidekiq.yml
+
+```yaml
+ ---
+ :concurrency: 10
+ development:
+   :concurrency: 10
+ production:
+   :concurrency: 10
+ :queues:
+   - default
+   - service_name
+
+```
+
+1. config/schedule.yml ( )
+
+```
+ ---
+ sevice_name:
+   cron: "* * * * *"
+   class: "Comment::DeleteService" #
+   queue: sevice_name
+
+```
+
+1. .env.development.local
+
+```
+# REDIS
+REDIS_DSN="redis://redis:6379/0"
+
+#
+NCLOUD_ACCESS_KEY=""
+NCLOUD_SECRET_KEY=""
+
+#
+NCLOUD_ALIM_TALK_SERVICE_ID=""
+NCLOUD_ALIM_TALK_PLUS_FRIEND_ID=""
+
+# SMS
+NCLOUD_FROM_NUMBER="0269597414"
+NCLOUD_SMS_SERVICE_ID=""
+
+# sidekiq
+REDIS_SIDEKIQ_DSN="redis://redis:6379/1"
+# SIDEKIQ_TESTING="1"
+
+```
+
+## 25. lib
+
+sms lib .
+
+- sms
+
+  1. lib/sens_sms.rb
+
+     ```
+     # frozen_string_literal: true
+
+     require "faraday"
+     require "sens_sms/configure"
+     require "sens_sms/configuration"
+     require "sens_sms/configuration/validate"
+     require "sens_sms/client"
+
+     module SensSms
+     end
+
+     ```
+
+  2. lib/sens_sms/configuration/validate.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensSms
+       module Configuration
+         module Validate
+           def validate_configure
+             validate_configure_defined? && validate_configure_exist?
+           end
+
+           def validate_configure_defined?
+             self.class.class_variable_defined?(:@@access_key) &&
+               self.class.class_variable_defined?(:@@service_id) &&
+               self.class.class_variable_defined?(:@@secret_key)
+           end
+
+           def validate_configure_exist?
+             !self.class.class_variable_get(:@@access_key).nil? &&
+               !self.class.class_variable_get(:@@service_id).nil? &&
+               !self.class.class_variable_get(:@@secret_key).nil?
+           end
+         end
+       end
+     end
+
+     ```
+
+  3. lib/sens_sms/client.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensSms
+       class Client
+         attr_reader :response, :body, :errors, :request_time, :timestamp
+
+         def initialize
+           raise "Configure is not valid." unless validate_configure
+         end
+
+         def deliver(type:, from_number:, to_numbers:, subject: nil, message:)
+           raise "Invalid message type: #\{type\}" unless %i[sms lms].include? type.to_sym
+
+           @timestamp = current_timestamp
+           @response = Faraday.post(ncloud_sens_api_url,
+                                   \{
+                                     type: type.to_sym,
+                                     contentType: :COMM,
+                                     countryCode: "82",
+                                     from: from_number,
+                                     subject: subject,
+                                     content: message,
+                                     messages: parsed_messages(to_numbers)
+                                   \}.to_json,
+                                   ncloud_sens_api_header)
+           @body = JSON.parse(response.body)
+           p body
+           parse_response
+         end
+
+         def self.configure
+           yield configuration
+           @@access_key = @configuration.access_key
+           @@service_id = @configuration.service_id
+           @@secret_key = @configuration.secret_key
+         end
+
+         def self.configuration
+           @configuration ||= SensSms::Configure.new
+         end
+
+         private
+           include Configuration
+           include Configuration::Validate
+
+           def parse_response
+             p response
+             if response.success?
+               @request_time = Time.parse(body["requestTime"])
+             else
+               parse_errors
+             end
+             response.success?
+           end
+
+           def parse_errors
+             @errors = body["errors"] unless body["errors"].nil?
+             @errors = [body["error"]["message"]] unless body["error"].nil?
+           end
+
+           def current_timestamp
+             (Time.now.to_f.round(3) * 1000).to_i
+           end
+
+           def ncloud_sens_api_url
+             @ncloud_sens_api_url ||= "\<https://sens.apigw.ntruss.com/sms/v2/services/#\{service_id\}/messages\>"
+           end
+
+           def ncloud_sens_api_header
+             \{
+               "Content-Type" =\> "application/json; charset=utf-8",
+               "x-ncp-apigw-timestamp" =\> "#\{@timestamp\}",
+               "x-ncp-apigw-signature-v2" =\> signature,
+               "x-ncp-iam-access-key" =\> access_key
+             \}
+           end
+
+           def signature
+             sms_uri = "/sms/v2/services/#\{service_id\}/messages".freeze
+             data = "POST #\{sms_uri\}\\n#\{@timestamp\}\\n#\{access_key\}".freeze
+
+             Base64.encode64(OpenSSL::HMAC.digest("sha256", secret_key, data)).strip
+           end
+
+           def parsed_messages(to_numbers)
+             Array(to_numbers).map \{ |to_number| \{ to: to_number \} \}
+           end
+       end
+     end
+
+     ```
+
+  4. lib/sens_sms/configuration.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensSms
+       module Configuration
+         def access_key
+           self.class.class_variable_get(:@@access_key)
+         end
+
+         def secret_key
+           self.class.class_variable_get(:@@secret_key)
+         end
+
+         def service_id
+           self.class.class_variable_get(:@@service_id)
+         end
+       end
+     end
+
+     ```
+
+  5. lib/sens_sms/configure.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensSms
+       class Configure
+         attr_accessor :access_key, :secret_key, :service_id
+       end
+     end
+
+     ```
+
+- 1. lib/sens_alim_talk.rb
+
+     ```
+     # frozen_string_literal: true
+
+     require "faraday"
+     require "sens_alim_talk/configure"
+     require "sens_alim_talk/configuration"
+     require "sens_alim_talk/configuration/validate"
+     require "sens_alim_talk/client"
+
+     module SensAlimTalk
+     end
+
+     ```
+
+  2. lib/sens_alim_talk/configuration/validate.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensAlimTalk
+       module Configuration
+         module Validate
+           def validate_configure
+             validate_configure_defined? && validate_configure_exist?
+           end
+
+           def validate_configure_exist?
+             !self.class.class_variable_get(:@@access_key).nil? &&
+               !self.class.class_variable_get(:@@service_id).nil? &&
+               !self.class.class_variable_get(:@@secret_key).nil? &&
+               !self.class.class_variable_get(:@@plus_friend_id).nil?
+           end
+
+           def validate_configure_defined?
+             self.class.class_variable_defined?(:@@access_key) &&
+               self.class.class_variable_defined?(:@@service_id) &&
+               self.class.class_variable_defined?(:@@secret_key) &&
+               self.class.class_variable_defined?(:@@plus_friend_id)
+           end
+         end
+       end
+     end
+
+     ```
+
+  3. lib/sens_alim_talk/client.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensAlimTalk
+       class Client
+         attr_reader :response, :body, :errors, :request_time, :timestamp
+
+         def initialize
+           raise "Configure is not valid." unless validate_configure
+         end
+
+         def deliver(template_code:, to_numbers:, title: nil, message:, buttons:)
+           @timestamp = current_timestamp
+           @response = Faraday.post(ncloud_sens_alim_talk_api_url,
+                                   parsed_body(template_code, to_numbers, title, message, buttons),
+                                   ncloud_sens_api_header)
+           @body = JSON.parse(response.body)
+           parse_response
+         end
+
+         def self.configure
+           yield configuration
+           @@access_key = @configuration.access_key
+           @@service_id = @configuration.service_id
+           @@secret_key = @configuration.secret_key
+           @@plus_friend_id = @configuration.plus_friend_id
+         end
+
+         def self.configuration
+           @configuration ||= SensAlimTalk::Configure.new
+         end
+
+         private
+           include Configuration
+           include Configuration::Validate
+
+           def parse_response
+             if response.success?
+               @request_time = Time.parse(body["requestTime"])
+             else
+               parse_errors
+             end
+             p response
+             response.success?
+           end
+
+           def parse_errors
+             @errors = body["errors"]
+             @errors = [body["error"]["message"]] unless body["error"].nil?
+           end
+
+           def current_timestamp
+             (Time.now.to_f.round(3) * 1000).to_i
+           end
+
+           def ncloud_sens_alim_talk_api_url
+             @ncloud_sens_alim_talk_api_url ||= "\<https://sens.apigw.ntruss.com/alimtalk/v2/services/#\{service_id\}/messages\>"
+           end
+
+           def ncloud_sens_api_header
+             \{
+               "Content-Type" =\> "application/json; charset=utf-8",
+               "x-ncp-apigw-timestamp" =\> "#\{@timestamp\}",
+               "x-ncp-apigw-signature-v2" =\> signature,
+               "x-ncp-iam-access-key" =\> access_key
+             \}
+           end
+
+           def signature
+             alim_talk_uri = "/alimtalk/v2/services/#\{service_id\}/messages".freeze
+             data = "POST #\{alim_talk_uri\}\\n#\{@timestamp\}\\n#\{access_key\}".freeze
+
+             Base64.encode64(OpenSSL::HMAC.digest("sha256", secret_key, data)).strip
+           end
+
+           def parsed_body(template_code, to_numbers, title, message, buttons)
+             \{
+               plusFriendId: plus_friend_id,
+               templateCode: template_code,
+               messages: parsed_messages(to_numbers, title, message, buttons),
+             \}.to_json
+           end
+
+           def parsed_messages(to_numbers, title, message, buttons)
+             Array(to_numbers).map \{ |to_number| \{
+               "countryCode": "82",
+               "to": to_number,
+               "title": title,
+               "content": message,
+               "buttons": buttons,
+             \} \}
+           end
+       end
+     end
+
+     ```
+
+  4. lib/sens_alim_talk/configuration.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensAlimTalk
+       module Configuration
+         def access_key
+           self.class.class_variable_get(:@@access_key)
+         end
+
+         def secret_key
+           self.class.class_variable_get(:@@secret_key)
+         end
+
+         def service_id
+           self.class.class_variable_get(:@@service_id)
+         end
+
+         def plus_friend_id
+           self.class.class_variable_get(:@@plus_friend_id)
+         end
+       end
+     end
+
+     ```
+
+  5. lib/sens_alim_talk/configure.rb
+
+     ```
+     # frozen_string_literal: true
+
+     module SensAlimTalk
+       class Configure
+         attr_accessor :access_key, :secret_key, :service_id, :plus_friend_id
+       end
+     end
+
+     ```
+
+## 26. rspec
+
+rspec .
+
+1. `rails g rspec:install` rspec
+2. spec/rails_helper.rb
+
+   ```ruby
+   # frozen_string_literal: true
+
+   # This file is copied to spec/ when you run 'rails generate rspec:install'
+   require "spec_helper"
+   ENV["RAILS_ENV"] ||= "test"
+   require File.expand_path("../config/environment", __dir__)
+   # Prevent database truncation if the environment is production
+   abort("The Rails environment is running in production mode!") if Rails.env.production?
+   require "rspec/rails"
+   # Add additional requires below this line. Rails is not loaded until this point!
+
+   # Requires supporting ruby files with custom matchers and macros, etc, in
+   # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
+   # run as spec files by default. This means that files in spec/support that end
+   # in _spec.rb will both be required and run as specs, causing the specs to be
+   # run twice. It is recommended that you do not name files matching this glob to
+   # end with _spec.rb. You can configure this pattern with the --pattern
+   # option on the command line or in ~/.rspec, .rspec or `.rspec-local`.
+   #
+   # The following line is provided for convenience purposes. It has the downside
+   # of increasing the boot-up time by auto-requiring all files in the support
+   # directory. Alternatively, in the individual `*_spec.rb` files, manually
+   # require only the support files necessary.
+   #
+   # Dir[Rails.root.join('spec', 'support', '**', '*.rb')].sort.each \{ |f| require f \}
+
+   # Checks for pending migrations and applies them before tests are run.
+   # If you are not using ActiveRecord, you can remove these lines.
+   begin
+     ActiveRecord::Migration.maintain_test_schema!
+   rescue ActiveRecord::PendingMigrationError =\> e
+     puts e.to_s.strip
+     exit 1
+   end
+   RSpec.configure do |config|
+     # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
+     config.fixture_path = "#\{::Rails.root\}/spec/fixtures"
+
+     # If you're not using ActiveRecord, or you'd prefer not to run each of your
+     # examples within a transaction, remove the following line or assign false
+     # instead of true.
+     config.use_transactional_fixtures = true
+
+     # You can uncomment this line to turn off ActiveRecord support entirely.
+     # config.use_active_record = false
+
+     # RSpec Rails can automatically mix in different behaviours to your tests
+     # based on their file location, for example enabling you to call `get` and
+     # `post` in specs under `spec/controllers`.
+     #
+     # You can disable this behaviour by removing the line below, and instead
+     # explicitly tag your specs with their type, e.g.:
+     #
+     #     RSpec.describe UsersController, type: :controller do
+     #       # ...
+     #     end
+     #
+     # The different available types are documented in the features, such as in
+     # \<https://relishapp.com/rspec/rspec-rails/docs\>
+     config.infer_spec_type_from_file_location!
+
+     # Filter lines from Rails gems in backtraces.
+     config.filter_rails_from_backtrace!
+     # arbitrary gems may also be filtered via:
+     # config.filter_gems_from_backtrace("gem name")
+     config.include ApplicationSpecSupport
+   end
+
+   Shoulda::Matchers.configure do |config|
+     config.integrate do |with|
+       with.test_framework :rspec
+       with.library :rails
+     end
+   end
+
+   ```
+
+3. spec/spec_helper.rb
+
+   ```
+   # frozen_string_literal: true
+
+   # This file was generated by the `rails generate rspec:install` command. Conventionally, all
+   # specs live under a `spec` directory, which RSpec adds to the `$LOAD_PATH`.
+   # The generated `.rspec` file contains `--require spec_helper` which will cause
+   # this file to always be loaded, without a need to explicitly require it in any
+   # files.
+   #
+   # Given that it is always loaded, you are encouraged to keep this file as
+   # light-weight as possible. Requiring heavyweight dependencies from this file
+   # will add to the boot time of your test suite on EVERY test run, even for an
+   # individual file that may not need all of that loaded. Instead, consider making
+   # a separate helper file that requires the additional dependencies and performs
+   # the additional setup, and require it from the spec files that actually need
+   # it.
+   #
+   # See \<http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration\>
+   RSpec.configure do |config|
+     # rspec-expectations config goes here. You can use an alternate
+     # assertion/expectation library such as wrong or the stdlib/minitest
+     # assertions if you prefer.
+     config.expect_with :rspec do |expectations|
+       # This option will default to `true` in RSpec 4. It makes the `description`
+       # and `failure_message` of custom matchers include text for helper methods
+       # defined using `chain`, e.g.:
+       #     be_bigger_than(2).and_smaller_than(4).description
+       #     # =\> "be bigger than 2 and smaller than 4"
+       # ...rather than:
+       #     # =\> "be bigger than 2"
+       expectations.include_chain_clauses_in_custom_matcher_descriptions = true
+     end
+
+     # rspec-mocks config goes here. You can use an alternate test double
+     # library (such as bogus or mocha) by changing the `mock_with` option here.
+     config.mock_with :rspec do |mocks|
+       # Prevents you from mocking or stubbing a method that does not exist on
+       # a real object. This is generally recommended, and will default to
+       # `true` in RSpec 4.
+       mocks.verify_partial_doubles = true
+     end
+
+     # This option will default to `:apply_to_host_groups` in RSpec 4 (and will
+     # have no way to turn it off -- the option exists only for backwards
+     # compatibility in RSpec 3). It causes shared context metadata to be
+     # inherited by the metadata hash of host groups and examples, rather than
+     # triggering implicit auto-inclusion in groups with matching metadata.
+     config.shared_context_metadata_behavior = :apply_to_host_groups
+
+   # The settings below are suggested to provide a good initial experience
+   # with RSpec, but feel free to customize to your heart's content.
+   =begin
+     # This allows you to limit a spec run to individual examples or groups
+     # you care about by tagging them with `:focus` metadata. When nothing
+     # is tagged with `:focus`, all examples get run. RSpec also provides
+     # aliases for `it`, `describe`, and `context` that include `:focus`
+     # metadata: `fit`, `fdescribe` and `fcontext`, respectively.
+     config.filter_run_when_matching :focus
+
+     # Allows RSpec to persist some state between runs in order to support
+     # the `--only-failures` and `--next-failure` CLI options. We recommend
+     # you configure your source control system to ignore this file.
+     config.example_status_persistence_file_path = "spec/examples.txt"
+
+     # Limits the available syntax to the non-monkey patched syntax that is
+     # recommended. For more details, see:
+     #   - \<http://rspec.info/blog/2012/06/rspecs-new-expectation-syntax/\>
+     #   - \<http://www.teaisaweso.me/blog/2013/05/27/rspecs-new-message-expectation-syntax/\>
+     #   - \<http://rspec.info/blog/2014/05/notable-changes-in-rspec-3/#zero-monkey-patching-mode\>
+     config.disable_monkey_patching!
+
+     # Many RSpec users commonly either run the entire suite or an individual
+     # file, and it's useful to allow more verbose output when running an
+     # individual spec file.
+     if config.files_to_run.one?
+       # Use the documentation formatter for detailed output,
+       # unless a formatter has already been configured
+       # (e.g. via a command-line flag).
+       config.default_formatter = "doc"
+     end
+
+     # Print the 10 slowest examples and example groups at the
+     # end of the spec run, to help surface which specs are running
+     # particularly slow.
+     config.profile_examples = 10
+
+     # Run specs in random order to surface order dependencies. If you find an
+     # order dependency and want to debug it, you can fix the order by providing
+     # the seed, which is printed after each run.
+     #     --seed 1234
+     config.order = :random
+
+     # Seed global randomization in this process using the `--seed` CLI option.
+     # Setting this allows you to use `--seed` to deterministically reproduce
+     # test failures related to randomization by passing the same `--seed` value
+     # as the one that triggered the failure.
+     Kernel.srand config.seed
+   =end
+   end
+
+   ```
+
+4. spec/support/application_spec_support.rb
+
+   ```
+   # frozen_string_literal: true
+
+   require "active_support/concern"
+   module ApplicationSpecSupport
+     extend ActiveSupport::Concern
+   end
+
+   ```
+
+5. spec/support/factory_bot.rb
+
+   ```
+   # frozen_string_literal: true
+
+   require "factory_bot"
+   RSpec.configure do |config|
+     config.include FactoryBot::Syntax::Methods
+   end
+
+   ```
+
+6. spec_fake_one_signal_notification.rb
+
+   ```
+   # frozen_string_literal: true
+
+   class FakeOneSignalNotification
+     Message = Struct.new(:app_id, :headings, :subtitle, :contents, :include_external_user_ids, :include_player_ids,
+                         :ios_badgeType, :ios_badgeIcon, :collapse_id, :url, :data, :icon)
+
+     cattr_accessor :messages
+     self.messages = []
+
+     def self.create(params: \{\}, opt: \{\})
+       self.messages \<\< Message.new(**params)
+     end
+   end
+
+   ```
+
+7. .rspec
+
+   ```
+   --color
+   --require spec_helper
+
+   ```
+
+## 27. service generator
+
+    service generator .
+
+1. lib/generators/service/USAGE
+
+   ```
+   Description:
+       Explain the generator
+
+   Example:
+       bin/rails generate service Thing
+
+       This will create:
+           what/will/it/create
+
+   ```
+
+2. lib/generators/service/service_generator.rb
+
+   ```
+   # frozen_string_literal: true
+
+   class ServiceGenerator \< Rails::Generators::NamedBase
+     source_root File.expand_path("templates", __dir__)
+     desc "This generator creates an initializer file at app/services/"
+
+     def create_interaction_file
+       template "service.rb.erb", "app/services/#\{file_path\}_service.rb"
+     end
+
+     def create_interaction_test_file
+       template "service_spec.rb.erb", "spec/services/#\{file_path\}_service_spec.rb"
+     end
+   end
+
+   ```
+
+3. lib/generators/service/templates/service.rb.erb
+
+   ```
+   # frozen_string_literal: true
+
+   class \<%= class_name %\>Service \< ServiceBase
+     # array :x, :y, :z,
+     # default: nil,
+     # desc: 'an example filter' do
+     #   # Some filters support sub-filters here.
+     # end
+
+     # string :name, strip: true
+
+     # boolean :kool_aid
+
+     # file :readme
+
+     # hash :preferences do
+     #   boolean :newsletter
+     #   boolean :sweepstakes
+     # end, strip: true
+
+     # hash :preferences do
+     #   boolean :newsletter
+     #   boolean :sweepstakes
+     # end, strip: false
+
+     # interface :serializer, methods: %i[dump load]
+
+     # object :cow, class: Animal
+
+     # record :cow, class: Animal, finder: :find_by_uid!
+
+     # symbol :method
+
+     # date :birthday, format: '%Y-%m-%d', default: -\> \{ Date.today \}
+
+     # date_time :start, format: '%Y-%m-%dT%H:%M:%S', default: -\> \{ DateTime.now \}
+
+     # time :start, format: '%Y-%m-%dT%H:%M:%S', default: -\> \{ Time.now \}
+
+     # decimal :dollars, digits: 2
+
+     # integer :limit1, base: 10
+
+     # array :birthdays do
+     #   date
+     # end
+
+     # array :cows do
+     #   object class: Cow
+     # end
+
+     # validates :name, presence: true
+
+     # set_callback :validate, :before, -\> \{\}
+     # set_callback :validate, :after, -\> \{\}
+     # set_callback :type_check, :before, -\> \{\}
+     # set_callback :type_check, :after, -\> \{\}
+
+     def execute
+     end
+   end
+
+   ```
+
+4. lib/generators/service/templates/service_spec.rb.erb
+
+   ```
+     # frozen_string_literal: true
+
+   require "rails_helper"
+
+   RSpec.describe \<%= class_name %\>Service, "#run", type: :integration do
+     let(:base_params) \{ \{\} \}
+
+     subject \{
+       result = described_class.run(params)
+       result.log_error(Logger.new(STDOUT))
+       result
+     \}
+
+     context "when" do
+       let(:params) \{ base_params.merge(\{\}) \}
+
+       it \{ expect(subject.valid?).to be true \}
+     end
+   end
+
+   ```
+
+## 28. locales
+
+error locale .
+
+1. config/locales/base_errors/ko.yml
+
+   -
+
+   ```
+   ko:
+     base_errors:
+       system_error:
+         code: 90000
+         message:  .
+       invalid:
+         code: 40000
+         message:  .
+       active_interaction_error:
+         code: 40001
+       unauthorized:
+         code: 40100
+         message:   .
+       invalid_access_token:
+         code: 40101
+         message:  .
+       not_parse_access_token:
+         code: 40102
+         message:    .
+       forbidden:
+         code: 40300
+         message:    .
+       user_blocked_error:
+         code: 40301
+         message:   .
+       not_found:
+         code: 40400
+         message:       .
+       record_not_found:
+         code: 40401
+         message:     .
+
+   ```
+
+2. config/locales/default/ko.yml
+
+   -
+
+   ```
+   ko:
+     hello: "!"
+     errors:
+     active_interaction:
+       errors:
+         messages:
+           invalid: "."
+           invalid_nested: "()   . (%\{name\} =\> %\{value\})"
+           invalid_type: "()  %\{type\}."
+           missing: "() ."
+       types:
+         array: array
+         boolean: boolean
+         date: date
+         date_time: datetime
+         decimal: decimal
+         file: file
+         float: float
+         hash: hash
+         integer: integer
+         interface: interface
+         object: object
+         record: record
+         string: string
+         symbol: symbol
+         time: time
+
+   ```
+
+3. config/locales/services/ko.yml
+
+   -
+
+   ```
+   ko:
+     services:
+
+   ```
+
+## 30.
+
+     .
+
+1. config/routes.rb
+
+   ```
+   # frozen_string_literal: true
+
+   require "sidekiq/web"
+   require "sidekiq/cron/web"
+
+   # Configure Sidekiq-specific session middleware
+   Sidekiq::Web.use ActionDispatch::Cookies
+   Sidekiq::Web.use ActionDispatch::Session::CookieStore, key: "_interslice_session"
+
+   Rails.application.routes.draw do
+     get "welcome/ping"
+     get "error/default"
+     get "error/missing"
+     match "/500" =\> "errors#default", via: [:get, :post, :put, :patch, :delete]
+     match "/400" =\> "errors#bad_params", via: [:get, :post, :put, :patch, :delete]
+     match "/404" =\> "errors#missing", via: [:get, :post, :put, :patch, :delete]
+     match "/health/ping" =\> "welcome#ping", via: [:get, :post, :put, :patch, :delete]
+     # Define your application routes per the DSL in \<https://guides.rubyonrails.org/routing.html\>
+
+     scope "/v1" do
+       get "/health/ping", to: "welcome#ping"
+
+       namespace "neo" do
+         mount Sidekiq::Web =\> "/sidekiq"
+       end
+     end
+   end
+
+   ```
+
+2. app/services/service_base.rb
+
+   ````
+   # frozen_string_literal: true
+
+   class ServiceBase \< ActiveInteraction::Base
+     class \<\< self
+       def transactionable
+         include Transactionable
+       end
+
+       def paginatable
+         include Paginatable
+       end
+
+       def asyncable
+         include Sidekiq::Worker
+         sidekiq_options retry: false
+       end
+     end
+
+     def error_message
+       if invalid?
+         " : " + errors.messages.keys.to_s
+       end
+     end
+
+     def log_error(logger = Rails.logger)
+       if invalid?
+         logger.error(" : " + errors.full_messages.to_sentence)
+       end
+     end
+
+     # inputs    filter .
+     # foo   foo?  true  .
+     # ```
+     # class SomeClass \< ServiceBase
+     #    string :foo, :bar
+     # end
+     # k = SomeClass.new(foo: 'foo')
+     #
+     # k.inputs =\> :foo =\>  'foo', :bar =\> nil
+     # k.given_inputs =\> :foo =\> 'foo'
+     # ```
+     def given_inputs
+       inputs.select \{ |k, v| send("#\{k\}?") \}
+     end
+   end
+
+   ````
+
+3. app/services/concerns/paginatable.rb
+
+   ```
+   # frozen_string_literal: true
+
+   module Paginatable
+     extend ActiveSupport::Concern
+
+     included do
+       integer :page, default: 1
+       integer :size, default: 30
+     end
+
+     def paginated
+       result.page(page).per(size)
+     end
+   end
+
+   ```
+
+4. app/services/concerns/transactionable.rb
+
+   ```
+   # frozen_string_literal: true
+
+   module Transactionable
+     extend ActiveSupport::Concern
+
+     included do
+       set_callback :execute, :around, -\> (_interaction, block) \{
+         ActiveRecord::Base.transaction(&block)
+       \}
+     end
+   end
+
+   ```
+
+5. app/errors/base_error.rb
+
+   ```
+   # frozen_string_literal: true
+
+   class BaseError \< StandardError
+   end
+
+   ```
+
+6. app/errors/forbidden_error.rb
+
+   ```
+   # frozen_string_literal: true
+
+   class ForbiddenError \< RuntimeError
+   end
+
+   ```
+
+7. app/errors/unauthorized_error.rb
+
+   ```
+   # frozen_string_literal: true
+
+   class UnauthorizedError \< RuntimeError
+   end
+
+   ```
+
+8. app/errors/user_blocked_error.rb
+
+   ```
+   # frozen_string_literal: true
+
+   class UserBlockedError \< BaseError
+   end
+
+   ```
+
+9. app/serializers/application_serializer.rb
+
+   ```
+   # frozen_string_literal: true
+
+   class ApplicationSerializer \< ActiveModel::Serializer
+     include AmsLazyRelationships::Core
+     # uid    :id
+     attribute :uid, key: :id, if: -\> () \{ self.respond_to?(:uid) || object.respond_to?(:uid) \}
+   end
+
+   ```
+
+10. app/models/application_record.rb
+
+    ```
+    # frozen_string_literal: true
+
+    class ApplicationRecord \< ActiveRecord::Base
+      primary_abstract_class
+
+      def self.generate_unique_secure_token(length = nil)
+        # uuid v4
+        SecureRandom.uuid
+      end
+
+      scope :paginate, -\> (params) \{
+        if params.respond_to?(:permit)
+          permitted = params.permit(:page, :size)
+        else
+          permitted = params
+        end
+        page = permitted.fetch(:page, 1).to_i
+        size = permitted.fetch(:size, 100).to_i
+
+        page = [1, page].max
+        size = [100, size].min
+
+        page(page).per(size)
+      \}
+    end
+
+    ```
+
+11. app/workers/create_push_notification_worker.rb
+
+    ```
+    # frozen_string_literal: true
+
+    class CreatePushNotificationWorker
+      include Sidekiq::Worker
+      sidekiq_options retry: false
+
+      def perform(params)
+        OneSignal::Notification.create(params: params)
+      ensure
+        # perform_async   jid
+        return SecureRandom.uuid
+      end
+    end
+
+    ```
+
+12. app/controllers/application_controller.rb
+
+    ```
+    # frozen_string_literal: true
+
+    class ApplicationController \< ActionController::API
+      include Authenticatable
+      include Pundit
+      include ParameterAcceptable
+
+      rescue_from StandardError, with: :exception_handler
+      rescue_from ActiveRecord::RecordNotFound do |exception|
+        Rails.logger.info(exception)
+        render error: \{ status: 404, code: I18n.t("base_errors.record_not_found.code"),
+                        message: I18n.t("base_errors.record_not_found.message"), context: exception.class.to_s \}
+      end
+      rescue_from ActiveRecord::RecordInvalid, ActiveModel::ValidationError, ActionController::ParameterMissing do |exception|
+        Rails.logger.info(exception)
+        render error: \{ status: 400, code: I18n.t("base_errors.invalid.code"),
+                        message: I18n.t("base_errors.invalid.message"), context: exception.class.to_s \}
+      end
+      rescue_from ActiveInteraction::Error do |exception|
+        Rails.logger.info(exception)
+        render error: \{ status: 400, code: I18n.t("base_errors.active_interaction_error.code"),
+                        message: exception.interaction.errors.full_messages.to_sentence, context: exception.class.to_s \}
+      end
+      rescue_from Pundit::NotAuthorizedError, ForbiddenError do |exception|
+        Rails.logger.info(exception)
+        render error: \{ status: 403, code: I18n.t("base_errors.forbidden.code"),
+                        message: I18n.t("base_errors.forbidden.message"), context: exception.class.to_s \}
+      end
+      rescue_from UnauthorizedError do |exception|
+        Rails.logger.info(exception)
+        render error: \{ status: 401, code: I18n.t("base_errors.unauthorized.code"),
+                        message: I18n.t("base_errors.unauthorized.message"), context: exception.class.to_s \}
+      end
+      rescue_from BaseError do |exception|
+        Rails.logger.info(exception)
+        render error: \{ status: 400, code: I18n.t("base_errors.#\{exception.to_s.underscore\}.code"),
+                        message: I18n.t("base_errors.#\{exception.to_s.underscore\}.message"), context: exception.class.to_s \}
+      end
+
+      define_params(:api_params, \{
+        gps: [\{ gps: [:latitude, :longitude, :altitude, :accuracy] \}],
+        beacons: [\{ beacons: [:identifier, :uuid, :major, :minor, :rssi] \}],
+        wifis: [\{ wifis: [:bssid, :rssi, :ssid] \}],
+        cells: [\{ cells: [:mcc, :mnc, :cell_id, :lac, :telecom] \}],
+      \})
+
+      def api_params
+        case ActiveModelSerializers.config.key_transform
+        when :camel_lower
+          ActionController::Parameters.new(CaseTransform.underscore(params.to_unsafe_h.reject \{ |k, v| v.nil? \}))
+        else
+          params
+        end
+      end
+
+      def exception_handler(error)
+        Rails.logger.fatal(error.to_s)
+        if error.backtrace_locations
+          Rails.logger.fatal(error.backtrace_locations.join("\\n"))
+        end
+
+        render(error: \{ status: 500, code: I18n.t("base_errors.system_error.code"),
+                        message: I18n.t("base_errors.system_error.message"), context: error.to_s \})
+      end
+    end
+
+    ```
+
+13. app/controllers/errors_controller.rb
+
+    ```
+    # frozen_string_literal: true
+
+    class ErrorsController \< ApplicationController
+      def default
+        render error: \{ status: 500, code: I18n.t("base_errors.system_error.code"),
+                        message: I18n.t("base_errors.system_error.message"), context: "" \}
+      end
+
+      def bad_params
+        render error: \{ status: 400, code: I18n.t("base_errors.invalid.code"),
+                        message: I18n.t("base_errors.invalid.message"), context: "" \}
+      end
+
+      def missing
+        render error: \{ status: 404, code: I18n.t("base_errors.not_found.code"),
+                        message: I18n.t("base_errors.not_found.message"), context: "" \}
+      end
+    end
+
+    ```
+
+14. app/controllers/welcome_controller.rb
+
+    ```
+    # frozen_string_literal: true
+
+    class WelcomeController \< ApplicationController
+      def ping
+        render api: \{ ping: "pong", hostname: Socket.gethostname \}
+      end
+    end
+
+    ```
+
+15. app/controllers/concerns/authenticatable.rb
+
+    ```
+    # frozen_string_literal: true
+
+    module Authenticatable
+      extend ActiveSupport::Concern
+
+      attr_reader :current_user
+
+      def auth_payload
+        @payload
+      end
+
+      def authenticate_user
+        # decode =\> camelcase
+        @current_user ||= if access_token
+          algorithms = [Rails.configuration.x.auth.signing_algorithm]
+          key = Rails.configuration.x.auth.secret_key
+          decoded = JWT.decode(access_token, key, true, \{ algorithms: algorithms \})
+          @payload = payload = CaseTransform.underscore(decoded.first || \{\})
+
+          if payload.fetch("type", nil) == "ACCESS_TOKEN"
+            user_uid = payload.fetch("user_id", nil)
+            @user = User.find_by(uid: user_uid)
+            status
+          else
+            nil
+          end
+        else
+          nil
+        end
+      end
+
+      def status
+        case @user.status.to_sym
+        when :complete, :block
+          @user
+        else
+          nil
+        end
+      end
+
+      def authenticate_admin
+        if access_token
+          key = Rails.configuration.x.oauth.hmac
+          aud = Rails.configuration.x.oauth.client_id
+          JWT.decode(access_token, key, true, verify_iss: true, iss: ENV.fetch("ARM_JWT_ISSUER"),
+                    verify_aud: true, aud: aud)
+        else
+          raise StandardError.new
+        end
+      end
+
+      def authenticate_user!
+        authenticate_user
+        if current_user.nil?
+          Rails.logger.fatal "Invalid Access Token"
+          render error: \{ status: :unauthorized, code: I18n.t("base_errors.invalid_access_token.code"),
+                          message: I18n.t("base_errors.invalid_access_token.message"), context: "Invalid Access Token" \}
+        else
+          if current_user.status == "block"
+            Rails.logger.fatal "User Is Blocked"
+            raise UserBlockedError.new
+          end
+        end
+      rescue StandardError
+        Rails.logger.info "Access Token Parse Error"
+        render error: \{ status: :unauthorized, code: I18n.t("base_errors.not_parse_access_token.code"),
+                        message: I18n.t("base_errors.not_parse_access_token.message"), context: "Access Token Parse Error" \}
+      end
+
+      def authenticate_admin!
+        authenticate_admin
+      rescue StandardError
+        Rails.logger.info "Access Token Parse Error"
+        render error: \{ status: :unauthorized, code: I18n.t("base_errors.invalid_access_token.code"),
+                        message: I18n.t("base_errors.invalid_access_token.message"), context: "Access Token Parse Error" \}
+      end
+
+      def access_token
+        @access_token ||= begin
+                            header = request.headers.fetch("Authorization", "")
+                            header.split(" ").last
+                          end
+      end
+    end
+
+    ```
+
+16. app/controllers/concerns/parameter_acceptable.rb
+
+    ```
+    # frozen_string_literal: true
+
+    module ParameterAcceptable
+      extend ActiveSupport::Concern
+
+      included do
+        def self.parameter_to_send
+          @@parameter_to_send
+        end
+
+        def self.define_params(parameter_to_send, definition)
+          @@parameter_to_send = parameter_to_send
+          @@defined_params = definition
+        end
+
+        def self.defined_params
+          @@defined_params
+        end
+
+        def self.ref_params
+          definition = yield
+          Proc.new \{ param_filters(definition) \}
+        end
+      end
+
+      attr_accessor :permitted_params
+
+      def accept_params(*filter_names)
+        params = send(self.class.parameter_to_send)
+        @permitted_params = params.permit(param_filters(filter_names))
+        @permitted_params
+      end
+
+      def param_filters(filter_names)
+        filter_names.collect do |filter_name|
+          defined_params = self.class.defined_params
+
+          filter = defined_params.fetch(filter_name, [filter_name])
+          filter = instance_eval(&filter) if filter.respond_to?(:call)
+
+          filter
+        end
+      end
+    end
+
+    ```
+
+17. ```
+    $ touch ./app/controllers/neo/.keep
+
+    ```
+
+## 40. USAGE
+
+### Routing
+
+.
+
+[https://guides.rubyonrails.org/routing.html](https://guides.rubyonrails.org/routing.html)
+
+: `config/routes.rb`
+
+### Controller
+
+/
+
+`CreditCardsController` . .
+
+```
+rails g controller CreditCards
+
+```
+
+### Exception Handler
+
+ApplicationController rescue_from .
+
+```
+rescue_from StandardError, with: :exception_handler # 500 , exception_handler
+
+# id  ,   , =\> 404 Not Found
+rescue_from ActiveRecord::RecordNotFound do |exception|
+  Rails.logger.info(exception)
+  render error: \{ status: 404, code: I18n.t("base_errors.record_not_found.code"),
+                  message: I18n.t("base_errors.record_not_found.message"), context: exception.class.to_s \}
+end
+
+#   Validation Error   =\> 400 Bad Request
+rescue_from ActiveRecord::RecordInvalid, ActiveModel::ValidationError, ActionController::ParameterMissing do |exception|
+  Rails.logger.info(exception)
+  render error: \{ status: 400, code: I18n.t("base_errors.invalid.code"),
+                  message: I18n.t("base_errors.invalid.message"), context: exception.class.to_s \}
+end
+
+#    =\> 400 Bad Request
+rescue_from ActiveInteraction::Error do |exception|
+  Rails.logger.info(exception)
+  render error: \{ status: 400, code: I18n.t("base_errors.active_interaction_error.code"),
+                  message: exception.interaction.errors.full_messages.to_sentence, context: exception.class.to_s \}
+end
+
+# Policy  =\> 403 Forbidden
+rescue_from Pundit::NotAuthorizedError, ForbiddenError do |exception|
+  Rails.logger.info(exception)
+  render error: \{ status: 403, code: I18n.t("base_errors.forbidden.code"),
+                  message: I18n.t("base_errors.forbidden.message"), context: exception.class.to_s \}
+end
+
+# jwt  =\> 401 Unauthorized
+rescue_from UnauthorizedError do |exception|
+  Rails.logger.info(exception)
+  render error: \{ status: 401, code: I18n.t("base_errors.unauthorized.code"),
+                  message: I18n.t("base_errors.unauthorized.message"), context: exception.class.to_s \}
+end
+
+#   =\> 400 Bad Request
+rescue_from BaseError do |exception|
+  Rails.logger.info(exception)
+  render error: \{ status: 400, code: I18n.t("base_errors.#\{exception.to_s.underscore\}.code"),
+                  message: I18n.t("base_errors.#\{exception.to_s.underscore\}.code"), context: exception.class.to_s \}
+end
+
+```
+
+### Model
+
+/ /
+
+Author .
+
+```
+$ rails g model Author name:string genre:string bio:text
+
+=\>
+  invoke  active_record
+  create    db/migrate/20190618010724_create_authors.rb
+  create    app/models/application_record.rb
+  create    app/models/author.rb
+
+```
+
+Migration .
+
+```
+$ rake db:migrate
+
+```
+
+: ( redo .)
+
+```
+$ rake db:migrate:redo
+
+```
+
+: Redo .
+
+/
+
+schema_migrations row ( )
+
+db:migrate
+
+### Service
+
+/
+
+`Users::CreateCreditCardService` .
+
+```
+$ rails g service Users::CreateCreditCard
+
+  =\>
+  create  app/services/users/credit_card_service.rb
+  create  spec/services/users/credit_card_service_spec.rb
+
+```
+
+###
+
+`ActiveRecord::Relation` .
+
+```
+meetings = Meeting.all
+meetings = meetings.by_date(date) if meeting_date_from? and meeting_date_to?
+meetings = meetings.by_organizer(organizer) if meeting_organizer_name.present?
+meetings = meetings.by_organizer_team(team) if meeting_organizer_team?
+
+```
+
+### Policy
+
+     Policy .
+
+Gem: pundit([https://github.com/varvet/pundit](https://github.com/varvet/pundit))
+
+: pundit Scope List / Item view . ActiveRecordRelation::Scoping .
+
+: [https://apidock.com/rails/ActiveRecord/Relation/scoping](https://apidock.com/rails/ActiveRecord/Relation/scoping)
+
+```
+Comment.where(post_id: 1).scoping do
+  Comment.first
+end
+# =\> SELECT "comments".* FROM "comments" WHERE "comments"."post_id" = 1 ORDER BY "comments"."id" ASC LIMIT 1
+
+```
+
+### Serializer
+
+JSON Response Serializer .
+
+Gem:
+active_record_serializer ([https://github.com/rails-api/active_model_serializers](https://github.com/rails-api/active_model_serializers))
+
+: [https://github.com/rails-api/active_model_serializers/tree/v0.10.6/docs](https://github.com/rails-api/active_model_serializers/tree/v0.10.6/docs)
+
+Serializer .
+
+`User` `UserSerializer` .
+
+ApplicationSerializer `uid` JSON `id` . (`uid` )
+
+```
+# uid    :id
+attribute :uid, key: :id, if: -\> () \{ object.respond_to?(:uid) \}
+
+```
+
+attribute attributes , has\_\* .
+
+has_one Response .
+
+     Response  (:   API  API Response)       .
+
+```
+
+class ClientSerializer \< ApplicationSerializer
+  attributes :name, :check_in_count_of_company, :label, :notes #
+  has_one :place, serializer: PlaceSerializer #
+end
+
+```
+
+```
+render api: client, includes: %w(place, last_meeting_organizer, last_meeting_organizer.team) # last_meeting_organizer.team  organizer(User  include, nested )
+
+```
+
+### Errors
+
+`ForbiddenError` .
+
+```
+$ rails g error Forbbiden
+
+  =\>
+  identical  app/errors/test_error.rb
+  append  config/locales/base_errors/ko.yml
+
+```
+
+### Sidekiq
+
+    Sidekiq  .
+
+Github: [https://github.com/mperham/sidekiq](https://github.com/mperham/sidekiq)
+
+```
+$ sidekiq -e development
+
+```
+
+Sidekiq include `perform` .
+
+```
+
+class SomeClass
+  include Sidekiq::Worker
+
+  def perform(args) end
+end
+
+```
+
+:
+
+`perform` `args` Integer, String, Hash String evaluate .
+
+```
+#  ,
+def perform(active_record)
+  active_record.save!
+end
+
+# ...
+
+#   .
+def perform(active_record_id)
+  SomeModel.find(active_record_id).save!
+end
+
+# ...
+
+```
+
+###
+
+Sidekiq Rails . Worker Sidekiq Rails
+.
+
+      .
+
+.env.development.local
+
+```
+SIDEKIQ_TESTING="1"
+
+```
+
+         Rails   Sidekiq  .
+
+.env.development.local
+
+```
+# SIDEKIQ_TESTING="1"
+
+```
+
+render error: \{ status: 400, code: I18n.t("base_errors.#\{exception.to_s.underscore\}.code"),
+message: I18n.t("base_errors.#\{exception.to_s.underscore\}.code"), context: exception.class.to_s \}
+end
+
+```
+
+### Model
+
+모델 파일 / 마이그레이션 / 테스트 제너레이션
+
+예를들어 Author 모델을 생성한다면 다음과 같이 합니다.
+
+```
+
+$ rails g model Author name:string genre:string bio:text
+
+=\>
+invoke active_record
+create db/migrate/20190618010724_create_authors.rb
+create app/models/application_record.rb
+create app/models/author.rb
+
+```
+
+이후 Migration 실행은 다음과 같이 합니다.
+
+```
+
+$ rake db:migrate
+
+```
+
+팁: 마이그레이션이 잘못된 경우 재시도 (쿼리 특성에 따라 redo가 되지 않는 경우가 있습니다.)
+
+```
+
+$ rake db:migrate:redo
+
+```
+
+팁: Redo가 되지 않는 경우에는 다음과 같이 합니다.
+
+테이블 / 컬럼 등 수동으로 기존으로 전환
+
+schema_migrations 테이블에서 해당 마이그레이션 row 삭제 (연월일시분초 타임스탬프 형식)
+
+db:migrate 재시도
+
+### Service
+
+서비스 클래스 / 테스트 제너레이션
+
+예를들어 `Users::CreateCreditCardService`를 생성한다면 다음과 같이 합니다.
+
+```
+
+$ rails g service Users::CreateCreditCard
+
+=\>
+create app/services/users/credit_card_service.rb
+create spec/services/users/credit_card_service_spec.rb
+
+```
+
+### 다이나믹 쿼리 만들기
+
+`ActiveRecord::Relation` 의 특징을 이용해 다음의 형태로 쿼리를 만듭니다.
+
+```
+
+meetings = Meeting.all
+meetings = meetings.by_date(date) if meeting_date_from? and meeting_date_to?
+meetings = meetings.by_organizer(organizer) if meeting_organizer_name.present?
+meetings = meetings.by_organizer_team(team) if meeting_organizer_team?
+
+```
+
+### Policy
+
+회원 권한에 따른 컨트롤러 호출권한은 Policy를 활용합니다.
+
+관련 Gem: pundit([https://github.com/varvet/pundit](https://github.com/varvet/pundit))
+
+팁: pundit 의 Scope은 List / Item view에 대해 제한을 편리하게 해줍니다. 활용을 위해서는 ActiveRecordRelation::Scoping 개념을 이해하는 것이 중요합니다.
+
+참고: [https://apidock.com/rails/ActiveRecord/Relation/scoping](https://apidock.com/rails/ActiveRecord/Relation/scoping)
+
+```
+
+Comment.where(post_id: 1).scoping do
+Comment.first
+end
+
+# =\> SELECT "comments".\* FROM "comments" WHERE "comments"."post_id" = 1 ORDER BY "comments"."id" ASC LIMIT 1
+
+```
+
+### Serializer
+
+모델이 최종적으로 JSON포맷으로 변경해 Response로 보내기 위해 Serializer를 활용합니다.
+
+관련Gem:
+active_record_serializer ([https://github.com/rails-api/active_model_serializers](https://github.com/rails-api/active_model_serializers))
+
+가이드문서: [https://github.com/rails-api/active_model_serializers/tree/v0.10.6/docs](https://github.com/rails-api/active_model_serializers/tree/v0.10.6/docs)
+
+컨트롤러에서 Serializer를 지정하지 않으면 자동지정됩니다.
+
+예를들어 모델이 `User` 라면 `UserSerializer` 가 로드됩니다.
+
+ApplicationSerializer 가 테이블의 `uid` 를 JSON에서는 `id` 로 변경됩니다. (`uid` 가 있는경우만)
+
+```
+
+# uid가 있는 경우 자동으로 :id 로 변경함
+
+attribute :uid, key: :id, if: -\> () \{ object.respond_to?(:uid) \}
+
+```
+
+attribute 또는 attributes 는 항상 노출, has_* 은 명시적으로 노출을 지시해야 노출합니다.
+
+이를 이용해 has_one 관계를 설정하면 컨트롤러 액션마다 서로 다른 Response를 줄 수 있습니다.
+
+이 기능를 통해 서로 다른 Response를 주는 경우(예: 관리자 전용 API와 앱전용 API의 Response분리)나 불필요한 데이터베이스 쿼리를 처리하지 않을 수 있습니다.
+
+```
+
+class ClientSerializer \< ApplicationSerializer
+attributes :name, :check_in_count_of_company, :label, :notes # 상시 노출할 항목
+has_one :place, serializer: PlaceSerializer # 액션의 필요에 따라 노출할 항목
+end
+
+```
+
+컨트롤러에서 노출항목 결정방법
+
+```
+
+render api: client, includes: %w(place, last_meeting_organizer, last_meeting_organizer.team) # last_meeting_organizer.team 은 organizer(User의 팀까지 include, nested 방식)
+
+```
+
+### Errors
+
+에러 클래스 제너레이션
+
+예를들어 `ForbiddenError`를 생성한다면 다음과 같이 합니다.
+
+```
+
+$ rails g error Forbbiden
+
+=\>
+identical app/errors/test_error.rb
+append config/locales/base_errors/ko.yml
+
+```
+
+### Sidekiq
+
+백그라운드 태스크 관리를 위해 Sidekiq 을 사용합니다.
+
+프로젝트 Github: [https://github.com/mperham/sidekiq](https://github.com/mperham/sidekiq)
+
+```
+
+$ sidekiq -e development
+
+```
+
+Sidekiq을 사용하기 위해서는 관련 모듈을 include 하고 `perform` 메서드를 작성해야 합니다.
+
+```
+
+class SomeClass
+include Sidekiq::Worker
+
+def perform(args) end
+end
+
+```
+
+주의:
+
+`perform` 의 `args` 는 Integer, String, Hash 등 String을 명시적으로 evaluate 할 수 있는 타입만 받아들입니다.
+
+```
+
+# 잘못된 예시, 액티브 레코드를 바로 받아들임
+
+def perform(active_record)
+active_record.save!
+end
+
+# ...
+
+# 이렇게 사용해야 합니다.
+
+def perform(active_record_id)
+SomeModel.find(active_record_id).save!
+end
+
+# ...
+
+```
+
+### 로컬 개발환경에서의 활용
+
+Sidekiq은 Rails와 달리 코드의 변경이 바로 반영되지 않습니다. 개발단계에서 이러한 불편함을 제거하기 위해 로컬 개발환경에서 Worker 코드는 레디스 → Sidekiq이 아니라 Rails가 곧바로
+실행합니다.
+
+이 기능을 활성화하기 위해 다음 환경변수가 필요합니다.
+
+.env.development.local
+
+```
+
+SIDEKIQ_TESTING="1"
+
+```
+
+만약 레디스를 통해 테스트하기 위해서는 위 라인을 주석처리한 후 Rails를 새로 실행하고 Sidekiq을 실행하면 됩니다.
+
+.env.development.local
+
+```
+
+# SIDEKIQ_TESTING="1"
+
+```
+
+```

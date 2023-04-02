@@ -1,0 +1,61 @@
+---
+title: AWS EC2 OS 업데이트
+slug: "/aws-ec2-os-업데이트"
+date: 2023-04-02
+---
+
+# AWS EC2 OS
+
+ALB -\> ()
+
+NLB -\>
+
+### ALB
+
+https ( )
+
+     -\>
+
+    ALB
+
+-\>
+
+-
+- ,
+
+netstat -an | grep LIST
+
+1.
+2. (deregister -\> )
+3. ssh
+4.
+5. (include as pending below)
+6.
+7. OS ( )
+8. EC2 -\> Instances created image
+9. image name -\> open jdk
+10.
+
+history !
+
+그룹으로 보낸다
+
+타겟그룹 -\> 인스턴스 서버 모아놓음
+
+- 포트는 이거 쓸꺼임
+- 헬스체크 얼마마다 할껀지, 몇번 실패하면 어케할건지 등등
+
+netstat -an | grep LIST  네트워크상태보는 명령어
+
+1. 타겟그룹간다
+2. 작업할거 타겟그룹에서 뺌 (deregister 버튼누르면 빠짐 -\> 드레이닝상태되면 빠짐)
+3. 작업할거 ssh 로 들어가서 업데이트 진행
+4. 리부팅
+5. 다시 타겟그룹에 넣음 (include as pending below)
+6. 반복
+7. OS 업데이트하고는 이미지떠놔야함 (망했을때 되돌리기 위해서)
+8. EC2 -\> Instances 에서 이미지뜰거 체크해서 created image
+9. image name -\> 다른거랑 똑같이 open jdk 등등 어떤거 쓴건지랑 오늘날짜로 지정
+10. 업데이트하면서 바꿨던 패키지나 등등은 잘 기억해놨다가 끝나고 잘되는지 확인
+
+history 하고 ! 하고 번호치면 똑같은거칠수잇음

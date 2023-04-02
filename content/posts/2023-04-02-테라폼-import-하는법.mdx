@@ -1,0 +1,32 @@
+---
+title: 테라폼 Import 하는법
+slug: "/테라폼-import-하는법"
+date: 2023-04-02
+---
+
+# Import
+
+    tf  devops  : tfstate   aws   -\> aws     tf  aws  tfstate  -\> terraform import -\>     state     state     terraform plan
+
+---
+
+1. ..io -\>
+2. (aws )
+3. resource (aws_ecx_cluster) -\> Import
+4.
+5. arn
+   1. aws ecs -\> task definitions aws
+      1. ecs service \<- ecs task definition ()
+      2. terraform state showapply -\> -\> (state push)0.14.8
+
+� 가져오면됨 왜냐면 소스코드 다 있으니까terraform plan
+**임포트 하는법**
+
+1. 레지스터리.테라폼.io -\> 테라폼 문서
+2. 검색 (aws 카테고리)
+3. 임포트할 resource (aws_ecx_cluster) -\> 맨밑에 Import
+4.
+5. 만약에 arn 을 사용하는 경우
+   1. aws ecs -\> task definitions 서비스에서 aws
+      1. ecs service \<- ecs task definition (종속됨)
+      2. terraform state showapply 절대 하면안됨 -\> 플랜 다하고 검토하고 해야댐 어플라이하면 변경되서 망함-\> 다하고 테라폼 클라우드에 연동 (state push)0.14.8
