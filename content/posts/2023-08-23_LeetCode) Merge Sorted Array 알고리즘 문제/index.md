@@ -8,7 +8,8 @@ tags:
 ---
 
 ## 88. Merge Sorted Array (정렬된 배열 병합)
-- _링크: [https://leetcode.com/problems/merge-sorted-array](https://leetcode.com/problems/merge-sorted-array/)_
+- _GitHub 링크: [https://github.com/hcgo97/leetcode/tree/master/0088-merge-sorted-array](https://github.com/hcgo97/leetcode/tree/master/0088-merge-sorted-array)_
+- _문제 링크: [https://leetcode.com/problems/merge-sorted-array](https://leetcode.com/problems/merge-sorted-array/)_
 
 > ### 문제 설명
 > 
@@ -142,7 +143,7 @@ class Solution(object):
 ## 2차 수정 - 문제를 잘못 이해한 부분 수정
 
 - 0의 값을 가지는 요소는 모두 삭제해야 하는 것으로 문제를 잘못 이해하고 있었다.
-- 0인 요소는 무조건 삭제하는 것이 아니라, `**nums1` 마지막 요소부터 `nums2` 요소 개수 만큼의 0인 요소를 삭제 해야하기 때문에** 해당하는 조건문을 추가하고 잘못된 코드를 삭제하였다.
+- 0인 요소는 무조건 삭제하는 것이 아니라, `nums1` 마지막 요소부터 `nums2` 요소 개수 만큼의 0인 요소를 삭제 해야하기 때문에 해당하는 조건문을 추가하고 잘못된 코드를 삭제하였다.
     ```python
     if n > 0:
         del nums1[-n:]

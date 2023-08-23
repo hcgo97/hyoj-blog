@@ -9,6 +9,7 @@ tags:
 
 ## 27. Remove Element (요소 제거)
 
+- _GitHub 링크: [https://github.com/hcgo97/leetcode/tree/master/0027-remove-element](https://github.com/hcgo97/leetcode/tree/master/0027-remove-element)_
 - _링크: [https://leetcode.com/problems/remove-element](https://leetcode.com/problems/remove-element)_
 
 > ### 문제 설명
