@@ -9,6 +9,7 @@ tags:
 
 ## 169. Majority Element (다수 요소)
 
+- _GitHub 링크: [https://github.com/hcgo97/leetcode/tree/master/0169-majority-element](https://github.com/hcgo97/leetcode/tree/master/0169-majority-element)_
 - _링크: [https://leetcode.com/problems/majority-element](https://leetcode.com/problems/majority-element)_
 
 > ### 문제 설명

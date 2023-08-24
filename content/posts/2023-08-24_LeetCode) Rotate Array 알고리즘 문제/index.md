@@ -9,6 +9,7 @@ tags:
 
 ## 189. Rotate Array (배열 회전)
 
+- _GitHub 링크: [https://github.com/hcgo97/leetcode/tree/master/0189-rotate-array](https://github.com/hcgo97/leetcode/tree/master/0189-rotate-array)_
 - _링크: [https://leetcode.com/problems/rotate-array](https://leetcode.com/problems/rotate-array)_
 
 > ### 문제 설명

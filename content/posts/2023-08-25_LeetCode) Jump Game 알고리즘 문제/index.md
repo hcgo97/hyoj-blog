@@ -9,6 +9,7 @@ tags:
 
 ## 55. Jump Game (점프 게임)
 
+- _GitHub 링크: [https://github.com/hcgo97/leetcode/tree/master/0055-jump-game](https://github.com/hcgo97/leetcode/tree/master/0055-jump-game)_
 - _링크: [https://leetcode.com/problems/jump-game](https://leetcode.com/problems/jump-game)_
 
 > ### 문제 설명

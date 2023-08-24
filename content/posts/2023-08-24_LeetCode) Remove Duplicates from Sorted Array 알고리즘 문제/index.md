@@ -9,6 +9,7 @@ tags:
 
 ## 26. Remove Duplicates from Sorted Array (정렬된 배열에서 중복 제거)
 
+- _GitHub 링크: [https://github.com/hcgo97/leetcode/tree/master/0026-remove-duplicates-from-sorted-array](https://github.com/hcgo97/leetcode/tree/master/0026-remove-duplicates-from-sorted-array)_
 - _링크: [https://leetcode.com/problems/remove-duplicates-from-sorted-array](https://leetcode.com/problems/remove-duplicates-from-sorted-array)_
 
 > ### 문제 설명
