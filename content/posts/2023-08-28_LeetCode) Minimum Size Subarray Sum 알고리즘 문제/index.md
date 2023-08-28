@@ -155,51 +155,6 @@ class Solution(object):
 ![hyoj leet code submit history](img1.png "hyoj leet code submit history")
 <br></br>
 
-## 다른 풀이 방법
-
-### 1. `isalnum()` 함수를 사용하는 방법 (시간: `O(n)`, 공간: `O(n)`)
-- _*링크:* https://leetcode.com/problems/valid-palindrome/discuss/350929/Solution-in-Python-3-(beats-~100)-(two-lines)-(-O(1)-solution-as-well-)
-
-```python
-class Solution:
-    def isPalindrome(self, s: str) -> bool:
-        # 1. 문자열을 소문자로 변환하고 알파벳과 숫자만을 선택하여 리스트를 생성한다.
-        s = [i for i in s.lower() if i.isalnum()]
-        
-        # 2. 리스트 s 와 그 뒤집은 버전을 비교하여 팰린드롬 인지 여부를 확인한다.
-        return s == s[::-1]
-```
-
-### 2. 투 포인터를 사용하는 방법 (시간: `O(n)`, 공간: `O(n)`)
-- _*링크:* https://leetcode.com/problems/valid-palindrome/discuss/2438656/Very-Easy-oror-100-oror-Fully-Explained-(Java-C%2B%2B-Python-JS-Python3)
-
-```python
-class Solution(object):
-    def isPalindrome(self, s):
-        # 1. 왼쪽과 오른쪽 포인터를 초기화하고 입력 문자열의 양 끝을 가리키게 한다.
-        left, right = 0, len(s) - 1
-
-        while left < right:
-            # 2. 왼쪽 포인터를 오른쪽으로 이동하여 알파벳과 숫자를 가리키게 한다.
-            while left < right and not s[left].isalnum():
-                left += 1
-
-            # 3. 비슷하게 오른쪽 포인터를 왼쪽으로 이동하여 알파벳과 숫자를 가리키게 한다.
-            while left < right and not s[right].isalnum():
-                right -= 1
-
-            # 4. 두 문자가 같은지 확인한다.
-            if s[left].lower() != s[right].lower():
-                # 4-1. 만약 같지 않다면 문자열은 유효한 팰린드롬이 아니므로 false 를 반환한다.
-                return False
-
-            # 4-2. 같다면 다음 반복으로 넘어가기 위해 양 포인터를 이동하여 다음 알파벳이나 숫자를 가리키게 한다.
-            left, right = left + 1, right - 1
-
-        # 5. 반복문이 성공적으로 종료되면 문자열이 팰린드롬이라 할 수 있으므로 true 를 반환한다.
-        return True
-```
-
 ## 회고
 _이번 문제는 도저히 감이 잡히지 않아서 해답을 참고하였는데, 투 포인터와 슬라이딩 윈도우 방법을 섞어서 푸는 문제였다._
 
