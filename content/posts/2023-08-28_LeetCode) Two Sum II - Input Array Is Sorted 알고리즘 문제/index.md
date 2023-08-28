@@ -10,7 +10,7 @@ tags:
 ## 167. Two Sum II - Input Array Is Sorted (두 수의 합계 II - Input 은 정렬된 배열)
 
 - _GitHub 링크: [https://github.com/hcgo97/leetcode/tree/master/0167-two-sum-ii-input-array-is-sorted](https://github.com/hcgo97/leetcode/tree/master/0167-two-sum-ii-input-array-is-sorted)_
-- _링크: [https://leetcode.com/problems/two-sum-ii-input-array-is-sorted](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/)_
+- _링크: [https://leetcode.com/problems/two-sum-ii-input-array-is-sorted](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted)_
 
 > ### 문제 설명
 >
@@ -67,7 +67,7 @@ tags:
 
 ## 풀이 과정
 
-1. 투 포인터 방법을 사용하기 위해 left, right 변수를 선언한다. left 는 numbers[0] (배열의 가장 첫번째), right 는 numbers[len(index) - 1] (배열의 가장 마지막) 에 위치하도록 초기화한다.
+1. 투 포인터 방법을 사용하기 위해 `left`, `right` 변수를 선언한다. `left` 는 `numbers[0]` (배열의 가장 첫번째), `right` 는 `numbers[len(index) - 1]` (배열의 가장 마지막) 에 위치하도록 초기화한다.
     ```python
     left = 0
     right = len(numbers) - 1
@@ -78,20 +78,20 @@ tags:
     for i in range(len(numbers) - 1):
     ```
 
-3. target 과 left, right 을 더한 값을 비교한다.
-   - target 과 같으면 left, right 를 +1 씩해서 return 한다.
-   - target 보다 크면(<) right 를 -1 해서 포인터 위치를 옮긴다.
-   - target 보다 작으면(>) left 를 +1 해서 포인터 위치를 옮긴다.
-    ```python
-        if target == numbers[left] + numbers[right]:
-            return [left + 1, right + 1]
+3. `target` 과 `left`, `right` 을 더한 값을 비교한다.
+  - `target` 과 같으면 `left`, `right` 를 `+1` 씩해서 return 한다.
+  - `target` 보다 크면`(<)` `right` 를 `-1` 해서 포인터 위치를 옮긴다.
+  - `target` 보다 작으면`(>)` `left` 를 `+1` 해서 포인터 위치를 옮긴다.
+   ```python
+   if target == numbers[left] + numbers[right]:
+           return [left + 1, right + 1]
             
-        if target < numbers[left] + numbers[right]:
-            right -= 1
+       if target < numbers[left] + numbers[right]:
+           right -= 1
 
-        if target > numbers[left] + numbers[right]:
-            left += 1
-    ```
+       if target > numbers[left] + numbers[right]:
+           left += 1
+   ```
 <br></br>
 
 ## 최초 제출 코드
