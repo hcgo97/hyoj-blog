@@ -193,7 +193,7 @@ class Solution(object):
 
 ## 문제 풀이 기록
 
-![image](https://github.com/hcgo97/leetcode/assets/72455719/d4dfcf96-70ed-4f61-99ef-ccdf4844be23)
+![hyoj leet code submit history](img1.png "hyoj leet code submit history")
 <br></br>
 
 ## 다른 풀이 방법
