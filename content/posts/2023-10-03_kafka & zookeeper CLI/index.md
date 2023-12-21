@@ -1,6 +1,6 @@
 ---
 title: kafka & zookeeper cli
-slug: "/kafka-&-zookeeper-cli"
+slug: "/kafka-and-zookeeper-cli"
 date: 2023-10-03
 tags:
   - Kafka
