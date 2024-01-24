@@ -1,7 +1,7 @@
 ---
 title: 왜 1byte 는 8bit 일까?
 slug: "/왜-1byte-는-8bit-일까"
-date: 2023-10-03
+date: 2024-01-24
 tags:
   - CS
 ---
