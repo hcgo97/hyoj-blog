@@ -5,6 +5,7 @@ date: 2023-10-03
 tags:
   - Kafka
   - Command
+  - DevOps
 ---
 
 ### 토픽 생성

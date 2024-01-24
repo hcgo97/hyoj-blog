@@ -16,13 +16,13 @@ tags:
 - 1TB (GB * 1024)
 - 1PB (TB * 1024)
 
-<br>
+<br></br>
 
 > 용량단위에서 bit 를 제외한 다른 단위들은 1024 를 곱하면 다음 단위로 넘어간다.
 > 
 > → _왜 bit 만 8을 곱하는 걸까?_
  
-<br>
+<br></br>
 
 ### 문자 표현 단위
 
@@ -40,13 +40,13 @@ tags:
     
 ![ascii-code-table](img1.png "ascii-code-table")
 
-<br> 
+<br></br>
 
 ### 결론
 
 - 문자 표현 포맷 테이블을 참조하면 8bit로 1개의 문자, 즉 1Byte가 표현되는 것을 알수있음.
 - 그러므로 8bit → 1Byte 이다.
 
-<br>
+<br></br>
 
 _참조: https://code-lab1.tistory.com/233_
